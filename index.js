@@ -4,6 +4,7 @@ import cors from "cors";
 import productRoute from "./routes/productRoute.js";
 import authRoute from "./routes/authRoute.js";
 import supplierAuth from "./routes/supplierAuth.js";
+import paymentRoute from "./routes/paymentRoute.js";
 const app = express();
 
 app.use(cors());

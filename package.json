@@ -1,0 +1,30 @@
+{
+  "name": "messhio-api",
+  "version": "1.0.0",
+  "type": "module",
+  "keywords": [
+    "Node.js",
+    "Express.js",
+    "MongoDB",
+    "JWT Authentication",
+    "RESTful API",
+    "E-commerce Backend",
+    "Product Management",
+    "Payment Integration"
+  ],
+  "description": "This project is the backend of an e-commerce platform called Meeshio, inspired by Meesho. It provides a robust API for handling user authentication, product management, cart and wishlist functionalities, order processing, and payment integration. The backend is built using Node.js and Express, with MongoDB as the database, ensuring scalability and flexibility. This backend manages all core operations and interacts seamlessly with the frontend to deliver a smooth user experience for customers, sellers, and administrators.",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "author": "Atish Fulzade",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.5.3",
+    "nodemon": "^3.1.4"
+  }
+}

@@ -6,4 +6,4 @@ export const categorySchema = new mongoose.Schema({
   imageURL: { type: String }, // Can add validation if needed
 });
 
-export default mongoose.model("Category", categorySchema);
+export const category = mongoose.model("Category", categorySchema);

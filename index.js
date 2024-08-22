@@ -5,6 +5,7 @@ import productRoute from "./routes/productRoute.js";
 import authRoute from "./routes/authRoute.js";
 import supplierAuth from "./routes/supplierAuth.js";
 import paymentRoute from "./routes/paymentRoute.js";
+import { connect } from "./db/conn.js";
 const app = express();
 
 app.use(cors());
@@ -15,7 +16,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1/products", productRoute);
 app.use("/api/v1/user/auth", authRoute);
 app.use("/api/v1/supplier/auth", supplierAuth);
-
+connect();
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

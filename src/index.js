@@ -4,11 +4,15 @@ import cors from "cors";
 import productRoute from "./routes/productRoute.js";
 import authRoute from "./routes/authRoute.js";
 import supplierAuth from "./routes/supplierAuth.js";
-import paymentRoute from "./routes/paymentRoute.js";
+import cookieParser from "cookie-parser";
 import { connect } from "./db/conn.js";
 const app = express();
 
 app.use(cors());
+app.use(cookieParser());
+app.use(express.json({ limit: "20kb" }));
+app.use(express.urlencoded({ extended: true }));
+app.disable("x-powered-by");
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });

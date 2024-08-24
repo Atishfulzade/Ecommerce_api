@@ -1,28 +1,17 @@
 import express from "express";
+import { loginUser, registerUser } from "../controllers/user.controller.js";
 const router = express.Router();
 
 // POST /api/v1/auth/login
-router.post("/login", (req, res) => {
-  // Add logic to authenticate user
-  res.send("User logged in successfully");
-});
+router.post("/login", loginUser);
 
 // POST /api/v1/auth/register
-router.post("/register", (req, res) => {
-  // Add logic to register a new user
-  res.send("User registered successfully");
-});
+router.post("/register", registerUser);
 
 // GET /api/v1/auth/verify
 router.get("/verify", (req, res) => {
   // Add logic to verify the user's identity, like email or token verification
   res.send("User verified");
-});
-
-// GET /api/v1/auth/user-exist
-router.get("/user-exist", (req, res) => {
-  // Add logic to check if the user's email already exists
-  res.send("User exists");
 });
 
 // POST /api/v1/auth/logout

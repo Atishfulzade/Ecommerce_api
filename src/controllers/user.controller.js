@@ -2,6 +2,8 @@ import { User } from "../models/userSchema.models.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import { generateOTP } from "../utils/generateOtp.js";
+import { sendOtpEmail } from "../utils/sendMail.js";
 
 dotenv.config();
 
@@ -73,9 +75,85 @@ export const loginUser = async (req, res) => {
       .json({ message: "Failed to login user", error: error.message });
   }
 };
-export const verifyUser = (req, res) => {
+export const verifyUser = (req, res, next) => {
   try {
+    // Extract token from Authorization header
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    // Verify token
+    jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
+      if (error) {
+        return res.status(403).json({ message: "Token is not valid" });
+      }
+
+      // Attach user info to request
+      req.user = decoded;
+      next(); // Proceed to the next middleware or route handler
+    });
   } catch (error) {
-    throw new Error(error.message, "user not authenticated");
+    res
+      .status(500)
+      .json({ message: "Failed to verify token", error: error.message });
+  }
+};
+
+export const logOutUser = (req, res) => {
+  res.json({ message: "Logged out successfully" });
+};
+
+// Send OTP and store it in session/database
+export const sendOtp = async (req, res) => {
+  try {
+    const { email } = req.body; // Make sure to get the email from the request body
+    const generatedOtp = generateOTP();
+
+    // Store OTP in session
+    req.session.otp = generatedOtp;
+
+    // Send OTP to the user's email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await sendOtpEmail(user.email, generatedOtp);
+
+    res.status(200).json({ message: "OTP sent successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to send OTP", error: error.message });
+  }
+};
+
+export const otpVerify = async (req, res) => {
+  try {
+    const { email, otp } = req.body; // Make sure to get both email and OTP from the request body
+
+    // Retrieve the stored OTP from session or database
+    const storedOtp = req.session.otp; // If using session
+    // Or retrieve from the database:
+    // const user = await User.findOne({ email }).select('otp');
+    // const storedOtp = user.otp;
+
+    // Compare the provided OTP with the stored one
+    if (otp == storedOtp) {
+      res.status(200).json({ message: "OTP verified successfully" });
+
+      // Optionally, clear the OTP from session or database after successful verification
+      req.session.otp = null;
+      // Or clear OTP in the database:
+      // await User.updateOne({ email }, { otp: null });
+    } else {
+      res.status(401).json({ message: "Invalid OTP" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to verify OTP", error: error.message });
   }
 };

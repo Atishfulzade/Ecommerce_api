@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { reviewSchema } from "./reviewSchema.models.js";
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -27,11 +28,7 @@ const ProductSchema = new mongoose.Schema(
     mall_verified: { type: Boolean },
     catalog_reviews_summary: {
       average_rating: { type: Number },
-      absolute_average_rating: { type: Number },
-      average_rating_str: { type: String },
-      rating_scale: { type: Number },
-      review_count: { type: Number },
-      rating_count: { type: Number },
+      review: [reviewSchema],
     },
     shipping: {
       charges: { type: Number },

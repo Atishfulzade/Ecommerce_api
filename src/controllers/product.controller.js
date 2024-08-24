@@ -10,6 +10,7 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
+// Create a new product
 export const createProduct = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -29,9 +30,11 @@ export const createProduct = async (req, res) => {
     res.status(500).json({ error: "Failed to create product" });
   }
 };
+
+// Filter products by price and category
 export const filterProduct = async (req, res) => {
   try {
-    const { minPrice, maxPrice, category } = req.query; // Use req.query to get query parameters
+    const { minPrice, maxPrice, category } = req.query;
     const filterConditions = {};
 
     // Only add filters if the query params are provided
@@ -51,9 +54,11 @@ export const filterProduct = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Find product by ID
 export const findById = async (req, res) => {
   try {
-    const { id } = req.params.id;
+    const { id } = req.params; // Correct destructuring
     const product = await Product.findById(id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -62,5 +67,48 @@ export const findById = async (req, res) => {
   } catch (error) {
     console.error("Failed to find product:", error);
     res.status(500).json({ error: "Failed to find product" });
+  }
+};
+
+// Update a product by ID
+export const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedField = req.body;
+
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    Object.assign(product, updatedField);
+
+    await product.save();
+
+    res.status(200).json({ message: "Product updated successfully", product });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Couldn't update product", error: error.message });
+  }
+};
+
+// Delete a product by ID
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await Product.deleteOne({ _id: id });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to delete product", error: error.message });
   }
 };

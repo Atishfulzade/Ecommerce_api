@@ -1,16 +1,16 @@
 import express from "express";
+import { verifyUser } from "../controllers/user.controller";
+import { getCart } from "../controllers/cart.controller";
 const router = express.Router();
 
 // Mock data (for demonstration purposes)
 let cart = [];
 
 // GET - Fetch all items in the cart
-router.get("/cart", (req, res) => {
-  res.json({ cart });
-});
+router.get("/", verifyUser, getCart);
 
 // POST - Add a new item to the cart
-router.post("/cart", (req, res) => {
+router.post("/", (req, res) => {
   const newItem = req.body; // Assuming item details come in the body
   cart.push(newItem);
   res.status(201).json({ message: "Item added to the cart", cart });

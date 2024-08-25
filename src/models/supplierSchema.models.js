@@ -1,31 +1,17 @@
 import mongoose from "mongoose";
 import { addressSchema } from "./addressSchema.models.js"; // Importing shared address schema
 
-const userSchema = new mongoose.Schema(
+const supplierSchema = new mongoose.Schema(
   {
     profileImage: {
       type: String,
       default: "default-profile.png",
     },
-    username: {
+    companyName: {
       type: String,
       required: true,
-      unique: true,
-      match: /^[a-zA-Z0-9]+$/i,
-      minlength: 6,
-      maxlength: 20,
-    },
-    firstname: {
-      type: String,
-      required: true,
-      minlength: 2,
-      maxlength: 50,
-    },
-    lastname: {
-      type: String,
-      required: true,
-      minlength: 2,
-      maxlength: 50,
+      minlength: 3,
+      maxlength: 100,
     },
     email: {
       type: String,
@@ -40,7 +26,30 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     address: [addressSchema],
-
+    vatNumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    contactPerson: {
+      firstname: {
+        type: String,
+        required: true,
+        minlength: 2,
+        maxlength: 50,
+      },
+      lastname: {
+        type: String,
+        required: true,
+        minlength: 2,
+        maxlength: 50,
+      },
+    },
+    role: {
+      type: String,
+      enum: ["supplier"],
+      default: "supplier",
+    },
     otp: String,
     isActive: {
       type: Boolean,
@@ -53,14 +62,8 @@ const userSchema = new mongoose.Schema(
     verificationToken: {
       type: String,
     },
-    cards: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Card",
-      },
-    ],
   },
   { timestamps: true }
 );
 
-export const User = mongoose.model("User", userSchema);
+export const Supplier = mongoose.model("Supplier", supplierSchema);

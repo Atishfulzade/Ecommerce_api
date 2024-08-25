@@ -28,8 +28,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/products", productRoute);
-app.use("/api/v1/user/auth", authRoute);
-app.use("/api/v1/supplier/auth", supplierAuth);
+app.use("/api/v1/user", authRoute);
+app.use("/api/v1/supplier", supplierAuth);
 
 connect();
 const PORT = process.env.PORT || 3000;

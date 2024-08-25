@@ -1,43 +1,32 @@
 import express from "express";
+import {
+  loginSupplier,
+  registerSupplier,
+  verifySupplier,
+  showProfile,
+  updateProfile,
+  deleteSupplier,
+  getAllSuppliers,
+} from "../controllers/supplier.controller.js";
+
 const router = express.Router();
 
 // Supplier login route
-router.post("/supplier_login", (req, res) => {
-  // Logic for supplier login
-  res.send("Supplier login");
-});
+router.post("/login", loginSupplier);
 
 // Supplier registration route
-router.post("/supplier_register", (req, res) => {
-  // Logic for supplier registration
-  res.send("Supplier registered");
-});
+router.post("/register", registerSupplier);
 
-// Get supplier details route
-router.get("/supplier/:id", (req, res) => {
-  const supplierId = req.params.id;
-  // Logic to get supplier details by ID
-  res.json({ message: `Get supplier details with ID: ${supplierId}` });
-});
+// Get supplier details by ID
+router.get("/profile/:id", verifySupplier, showProfile);
 
-// Update supplier details route
-router.put("/supplier/:id", (req, res) => {
-  const supplierId = req.params.id;
-  // Logic to update supplier details by ID
-  res.json({ message: `Supplier with ID: ${supplierId} updated` });
-});
+// Update supplier details by ID
+router.put("/profile/:id", verifySupplier, updateProfile);
 
-// Delete supplier route
-router.delete("/supplier/:id", (req, res) => {
-  const supplierId = req.params.id;
-  // Logic to delete supplier by ID
-  res.json({ message: `Supplier with ID: ${supplierId} deleted` });
-});
+// Delete supplier by ID
+router.delete("/profile/:id", verifySupplier, deleteSupplier);
 
 // Get all suppliers route
-router.get("/suppliers", (req, res) => {
-  // Logic to get all suppliers
-  res.json({ message: "List of all suppliers" });
-});
+router.get("/all", getAllSuppliers);
 
 export default router;

@@ -1,4 +1,4 @@
-import { User } from "../models/userSchema.models.js";
+import { Supplier } from "../models/supplierSchema.models.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
@@ -7,19 +7,19 @@ import { sendOtpEmail } from "../utils/sendMail.js";
 
 dotenv.config();
 
-// Register new user
-export const registerUser = async (req, res) => {
+// Register new Supplier
+export const registerSupplier = async (req, res) => {
   try {
-    const { username, firstname, lastname, email, password } = req.body;
+    const { companyName, firstname, lastname, email, password } = req.body;
 
-    // Check if username or email exists
-    const [usernameFound, emailFound] = await Promise.all([
-      User.findOne({ username }),
-      User.findOne({ email }),
+    // Check if companyName or email exists
+    const [companyNameFound, emailFound] = await Promise.all([
+      Supplier.findOne({ companyName }),
+      Supplier.findOne({ email }),
     ]);
 
-    if (usernameFound) {
-      return res.status(400).json({ message: "Username is already taken" });
+    if (companyNameFound) {
+      return res.status(400).json({ message: "Company name is already taken" });
     }
 
     if (emailFound) {
@@ -29,42 +29,42 @@ export const registerUser = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
-    const user = new User({
-      username,
-      firstname,
-      lastname,
+    // Create new Supplier
+    const supplier = new Supplier({
+      companyName,
+      contactPerson: { firstname, lastname },
       email,
       password: hashedPassword,
     });
 
-    await user.save();
+    await supplier.save();
 
-    res.status(201).json({ message: "User registered successfully" });
+    res.status(201).json({ message: "Supplier registered successfully" });
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Failed to register user", error: error.message });
+      .json({ message: "Failed to register supplier", error: error.message });
   }
 };
 
-// Login user
-export const loginUser = async (req, res) => {
+// Login Supplier
+export const loginSupplier = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     // Check if email exists
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const supplier = await Supplier.findOne({ email });
+    if (!supplier)
+      return res.status(404).json({ message: "Supplier not found" });
 
     // Check if password matches
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, supplier.password);
     if (!isMatch)
       return res.status(401).json({ message: "Invalid credentials" });
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user._id, username: user.username },
+      { id: supplier._id, companyName: supplier.companyName },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -73,12 +73,12 @@ export const loginUser = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Failed to login user", error: error.message });
+      .json({ message: "Failed to login supplier", error: error.message });
   }
 };
 
 // Verify JWT
-export const verifyUser = (req, res, next) => {
+export const verifySupplier = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) return res.status(401).json({ message: "No token provided" });
@@ -86,7 +86,7 @@ export const verifyUser = (req, res, next) => {
     jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
       if (error) return res.status(403).json({ message: "Invalid token" });
 
-      req.user = decoded;
+      req.supplier = decoded;
       next();
     });
   } catch (error) {
@@ -96,8 +96,8 @@ export const verifyUser = (req, res, next) => {
   }
 };
 
-// Logout user
-export const logOutUser = (req, res) => {
+// Logout Supplier
+export const logOutSupplier = (req, res) => {
   res.json({ message: "Logged out successfully" });
 };
 
@@ -107,11 +107,12 @@ export const sendOtp = async (req, res) => {
     const { email } = req.body;
     const generatedOtp = generateOTP();
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const supplier = await Supplier.findOne({ email });
+    if (!supplier)
+      return res.status(404).json({ message: "Supplier not found" });
 
     req.session.otp = generatedOtp;
-    await sendOtpEmail(user.email, generatedOtp);
+    await sendOtpEmail(supplier.email, generatedOtp);
 
     res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
@@ -144,14 +145,15 @@ export const resetPassword = async (req, res) => {
   try {
     const { email, newPassword, otp } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const supplier = await Supplier.findOne({ email });
+    if (!supplier)
+      return res.status(404).json({ message: "Supplier not found" });
 
     if (otp !== req.session.otp)
       return res.status(401).json({ message: "Invalid OTP" });
 
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
+    supplier.password = await bcrypt.hash(newPassword, 10);
+    await supplier.save();
 
     req.session.otp = null; // Clear OTP after password reset
     res.status(200).json({ message: "Password reset successfully" });
@@ -167,18 +169,20 @@ export const updateProfile = async (req, res) => {
   try {
     const { email, updatedFields } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const supplier = await Supplier.findOne({ email });
+    if (!supplier)
+      return res.status(404).json({ message: "Supplier not found" });
 
-    const updatedUser = await User.findByIdAndUpdate(
-      user._id,
+    const updatedSupplier = await Supplier.findByIdAndUpdate(
+      supplier._id,
       { $set: updatedFields },
       { new: true }
     );
 
-    res
-      .status(200)
-      .json({ message: "Profile updated successfully", user: updatedUser });
+    res.status(200).json({
+      message: "Profile updated successfully",
+      supplier: updatedSupplier,
+    });
   } catch (error) {
     res
       .status(500)
@@ -191,16 +195,42 @@ export const showProfile = async (req, res) => {
   try {
     const { id } = req.body;
 
-    const user = await User.findById(id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const supplier = await Supplier.findById(id);
+    if (!supplier)
+      return res.status(404).json({ message: "Supplier not found" });
 
-    res.status(200).json({ user });
+    res.status(200).json({ supplier });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to retrieve supplier profile",
+      error: error.message,
+    });
+  }
+};
+
+// Get all suppliers
+
+export const getAllSuppliers = async (req, res) => {
+  try {
+    const suppliers = await Supplier.find({});
+    res.status(200).json(suppliers);
   } catch (error) {
     res
       .status(500)
-      .json({
-        message: "Failed to retrieve user profile",
-        error: error.message,
-      });
+      .json({ message: "Failed to retrieve suppliers", error: error.message });
+  }
+};
+export const deleteSupplier = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const supplier = await Supplier.findByIdAndDelete(id);
+    if (!supplier) {
+      return res.status(404).json({ message: "Supplier not found" });
+    }
+    res.status(200).json({ message: "Supplier deleted successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to delete supplier", error: error.message });
   }
 };

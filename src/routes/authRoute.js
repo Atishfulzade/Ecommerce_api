@@ -6,6 +6,7 @@ import {
   registerUser,
   resetPassword,
   sendOtp,
+  showProfile,
   updateProfile,
   verifyUser,
 } from "../controllers/user.controller.js";
@@ -34,6 +35,7 @@ router.get("/otp", sendOtp);
 router.post("/otp", otpVerify);
 
 // PUT /api/v1/auth/profile (Update profile route)
-router.put("/profile", verifyUser, updateProfile);
 
+router.get("/profile", verifyUser, showProfile);
+router.put("/profile", verifyUser, updateProfile);
 export default router;

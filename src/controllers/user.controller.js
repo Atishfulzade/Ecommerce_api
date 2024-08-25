@@ -219,3 +219,26 @@ export const updateProfile = async (req, res) => {
     });
   }
 };
+export const showProfile = async (req, res, next) => {
+  try {
+    const { id } = req.body; // Extract the user ID from the request body
+
+    // Find the user by their ID
+    const user = await User.findById(id);
+
+    // If the user doesn't exist, return a 404 response
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Send the user's information as a response
+    res.status(200).json({ user });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        message: "Failed to retrieve user profile",
+        error: error.message,
+      });
+  }
+};

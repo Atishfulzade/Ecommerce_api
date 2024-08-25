@@ -157,3 +157,65 @@ export const otpVerify = async (req, res) => {
       .json({ message: "Failed to verify OTP", error: error.message });
   }
 };
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword, otp } = req.body;
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Verify OTP
+    const storedOTP = req.session.otp;
+    if (storedOTP !== otp) {
+      return res.status(401).json({ message: "Invalid OTP" });
+    }
+
+    // OTP verified successfully, reset the password
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    // Clear the OTP from the session
+    req.session.otp = null;
+
+    // Respond with success
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to reset password", error: error.message });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { email, updatedFields } = req.body; // Extracting email and updated fields from the request body
+
+    // Find the user by their email
+    const user = await User.findOne({ email });
+
+    // If the user doesn't exist, return a 404 response
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Update the user's profile with the provided fields
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user._id }, // Find user by ID
+      { $set: updatedFields }, // Set the fields to update
+      { new: true } // Return the updated document
+    );
+
+    // Send a success response with the updated user
+    res
+      .status(200)
+      .json({ message: "Profile updated successfully", user: updatedUser });
+  } catch (error) {
+    res.status(500).json({
+      message: "Unable to update profile information",
+      error: error.message,
+    });
+  }
+};

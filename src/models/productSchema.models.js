@@ -12,7 +12,7 @@ const ProductSchema = new mongoose.Schema(
     full_details: { type: String },
     share_text: { type: String },
     type: { type: String },
-    suppliers: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to User model
+    suppliers: { type: mongoose.Schema.Types.ObjectId, ref: "Supplier" }, // Reference to User model
 
     image: { type: String },
     collage_image: { type: String },

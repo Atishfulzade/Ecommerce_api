@@ -10,12 +10,19 @@ dotenv.config();
 // Register new Supplier
 export const registerSupplier = async (req, res) => {
   try {
-    const { companyName, firstname, lastname, email, password } = req.body;
+    const { companyName, contactPerson, email, password, vatNumber } = req.body;
+    const { firstname, lastname } = contactPerson;
 
-    // Check if companyName or email exists
-    const [companyNameFound, emailFound] = await Promise.all([
+    // Validate if vatNumber is provided
+    if (!vatNumber) {
+      return res.status(400).json({ message: "VAT number is required" });
+    }
+
+    // Check if companyName, email, or vatNumber already exists
+    const [companyNameFound, emailFound, vatNumberFound] = await Promise.all([
       Supplier.findOne({ companyName }),
       Supplier.findOne({ email }),
+      Supplier.findOne({ vatNumber }),
     ]);
 
     if (companyNameFound) {
@@ -24,6 +31,10 @@ export const registerSupplier = async (req, res) => {
 
     if (emailFound) {
       return res.status(400).json({ message: "Email is already in use" });
+    }
+
+    if (vatNumberFound) {
+      return res.status(400).json({ message: "VAT number is already in use" });
     }
 
     // Hash password
@@ -35,12 +46,14 @@ export const registerSupplier = async (req, res) => {
       contactPerson: { firstname, lastname },
       email,
       password: hashedPassword,
+      vatNumber,
     });
 
     await supplier.save();
 
     res.status(201).json({ message: "Supplier registered successfully" });
   } catch (error) {
+    console.error("Error during supplier registration:", error);
     res
       .status(500)
       .json({ message: "Failed to register supplier", error: error.message });
@@ -169,14 +182,17 @@ export const updateProfile = async (req, res) => {
   try {
     const { email, updatedFields } = req.body;
 
+    // Find the supplier by email
     const supplier = await Supplier.findOne({ email });
-    if (!supplier)
+    if (!supplier) {
       return res.status(404).json({ message: "Supplier not found" });
+    }
 
+    // Handle nested fields and other updates
     const updatedSupplier = await Supplier.findByIdAndUpdate(
       supplier._id,
       { $set: updatedFields },
-      { new: true }
+      { new: true, runValidators: true } // runValidators ensures schema validation
     );
 
     res.status(200).json({
@@ -193,7 +209,7 @@ export const updateProfile = async (req, res) => {
 // Show profile
 export const showProfile = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
 
     const supplier = await Supplier.findById(id);
     if (!supplier)
@@ -222,7 +238,7 @@ export const getAllSuppliers = async (req, res) => {
 };
 export const deleteSupplier = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     const supplier = await Supplier.findByIdAndDelete(id);
     if (!supplier) {
       return res.status(404).json({ message: "Supplier not found" });

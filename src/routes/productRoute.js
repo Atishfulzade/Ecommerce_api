@@ -7,18 +7,18 @@ import {
   getAllProducts,
   updateProduct,
 } from "../controllers/product.controller.js";
-import { verifyUser } from "../controllers/user.controller.js";
+import { verifySupplier } from "../controllers/supplier.controller.js";
 const router = express.Router();
 
 // Get all products
 router.get("/", getAllProducts);
 
 // Create a new product
-router.post("/", verifyUser, createProduct);
+router.post("/", verifySupplier, createProduct);
 
 // Filter products by category
-router.put("/:id", verifyUser, updateProduct);
-router.delete("/:id", verifyUser, deleteProduct);
+router.put("/:id", verifySupplier, updateProduct);
+router.delete("/:id", verifySupplier, deleteProduct);
 
 router.get("/filter", filterProduct);
 

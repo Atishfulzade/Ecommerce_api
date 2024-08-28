@@ -12,15 +12,62 @@ export const getCart = async (req, res) => {
     res.status(500).json({ message: error.message }); // Return 500 for server errors
   }
 };
+
 export const addToCart = async (req, res) => {
   try {
     const { email, newItem } = req.body;
-    if (!email) {
-      return res.status(400).json({ message: "Email is required" });
+    if (!email || !newItem) {
+      return res
+        .status(400)
+        .json({ message: "Email and new item are required" });
     }
-    Cart.push(newItem);
-    res.status(200).json({ message: "New item added successfully" });
+
+    const cartItem = new Cart(newItem);
+    await cartItem.save(); // Save the new cart item to the database
+
+    res.status(200).json({ message: "New item added successfully", cartItem });
   } catch (error) {
-    res.status(500).json(error.message);
+    res.status(500).json({ message: error.message }); // Return 500 for server errors
+  }
+};
+
+export const editCartItem = async (req, res) => {
+  try {
+    const { itemId, updatedField } = req.body;
+    if (!itemId || !updatedField) {
+      return res
+        .status(400)
+        .json({ message: "Item ID and updated field are required" });
+    }
+
+    const cartItem = await Cart.findByIdAndUpdate(itemId, updatedField, {
+      new: true,
+    });
+
+    if (!cartItem) {
+      return res.status(404).json({ message: "Item not found in the cart" });
+    }
+
+    res.status(200).json({ message: "Item updated successfully", cartItem });
+  } catch (error) {
+    res.status(500).json({ message: error.message }); // Return 500 for server errors
+  }
+};
+
+export const deleteCart = async (req, res) => {
+  try {
+    const { itemId } = req.body;
+    if (!itemId) {
+      return res.status(400).json({ message: "Item ID is required" });
+    }
+
+    const cartItem = await Cart.findByIdAndDelete(itemId);
+    if (!cartItem) {
+      return res.status(404).json({ message: "Item not found in the cart" });
+    }
+
+    res.status(200).json({ message: "Item deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message }); // Return 500 for server errors
   }
 };

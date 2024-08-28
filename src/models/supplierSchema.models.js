@@ -47,7 +47,6 @@ const supplierSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["supplier"],
       default: "supplier",
     },
     otp: String,

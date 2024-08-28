@@ -19,7 +19,6 @@ const addressSchema = new mongoose.Schema({
   zipCode: {
     type: String,
     required: true,
-    match: /^[0-9]{5}(-[0-9]{4})?$/, // Example for US Zip Codes
   },
   contactNumber: {
     type: String,

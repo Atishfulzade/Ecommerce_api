@@ -14,6 +14,7 @@ import {
   uploadImagesToS3,
   uploadImageToS3,
 } from "../utils/s3_configuration.js";
+import { authorizeRoles } from "../utils/AuthoriseRole.js";
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.post("/register", registerUser);
 router.post("/logout", logOutUser);
 
 // POST /api/v1/auth/send-otp (Step 1: Send OTP for password reset)
-router.post("/send-otp", sendOtp);
+router.post("/send-otp", authorizeRoles("user"), sendOtp);
 
 // POST /api/v1/auth/reset-password (Step 2: Verify OTP and reset password)
 router.post("/reset-password", resetPassword);

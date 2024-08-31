@@ -25,7 +25,7 @@ const supplierSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    address: [addressSchema],
+    address: [addressSchema], // If you want multiple addresses, otherwise use 'address: addressSchema'
     vatNumber: {
       type: String,
       required: true,
@@ -47,7 +47,8 @@ const supplierSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: "supplier",
+      enum: ["admin", "supplier"], // Corrected roles
+      default: "supplier", // Default role set to 'supplier'
     },
     otp: String,
     isActive: {

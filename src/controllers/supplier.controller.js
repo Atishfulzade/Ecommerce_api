@@ -7,40 +7,44 @@ import { sendOtpEmail } from "../utils/sendMail.js";
 
 dotenv.config();
 
+// Helper function to generate JWT token
+const generateToken = (supplier, expiresIn = "1h") => {
+  return jwt.sign(
+    {
+      id: supplier._id,
+      companyName: supplier.companyName,
+      role: supplier.role,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn }
+  );
+};
+
 // Register new Supplier
 export const registerSupplier = async (req, res) => {
   try {
     const { companyName, contactPerson, email, password, vatNumber } = req.body;
     const { firstname, lastname } = contactPerson;
 
-    // Validate if vatNumber is provided
     if (!vatNumber) {
       return res.status(400).json({ message: "VAT number is required" });
     }
 
-    // Check if companyName, email, or vatNumber already exists
     const [companyNameFound, emailFound, vatNumberFound] = await Promise.all([
       Supplier.findOne({ companyName }),
       Supplier.findOne({ email }),
       Supplier.findOne({ vatNumber }),
     ]);
 
-    if (companyNameFound) {
+    if (companyNameFound)
       return res.status(400).json({ message: "Company name is already taken" });
-    }
-
-    if (emailFound) {
+    if (emailFound)
       return res.status(400).json({ message: "Email is already in use" });
-    }
-
-    if (vatNumberFound) {
+    if (vatNumberFound)
       return res.status(400).json({ message: "VAT number is already in use" });
-    }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new Supplier
     const supplier = new Supplier({
       companyName,
       contactPerson: { firstname, lastname },
@@ -51,7 +55,12 @@ export const registerSupplier = async (req, res) => {
 
     await supplier.save();
 
-    res.status(201).json({ message: "Supplier registered successfully" });
+    const token = generateToken(supplier);
+
+    res.status(201).json({
+      message: "Supplier registered successfully",
+      token,
+    });
   } catch (error) {
     console.error("Error during supplier registration:", error);
     res
@@ -65,22 +74,15 @@ export const loginSupplier = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if email exists
     const supplier = await Supplier.findOne({ email });
     if (!supplier)
       return res.status(404).json({ message: "Supplier not found" });
 
-    // Check if password matches
     const isMatch = await bcrypt.compare(password, supplier.password);
     if (!isMatch)
       return res.status(401).json({ message: "Invalid credentials" });
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: supplier._id, companyName: supplier.companyName },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    const token = generateToken(supplier);
 
     res.json({ message: "Logged in successfully", token });
   } catch (error) {
@@ -182,20 +184,18 @@ export const updateProfile = async (req, res) => {
   try {
     const { email, updatedFields } = req.body;
 
-    // Find the supplier by email
     const supplier = await Supplier.findOne({ email });
-    if (!supplier) {
+    if (!supplier)
       return res.status(404).json({ message: "Supplier not found" });
-    }
+
     if (req.fileLocation) {
-      updatedFields.profileImage = req.fileLocation; // Update S3 file location
+      updatedFields.profileImage = req.fileLocation; // Update S3 file location if provided
     }
 
-    // Handle nested fields and other updates
     const updatedSupplier = await Supplier.findByIdAndUpdate(
       supplier._id,
       { $set: updatedFields },
-      { new: true, runValidators: true } // runValidators ensures schema validation
+      { new: true, runValidators: true } // Ensure schema validation
     );
 
     res.status(200).json({
@@ -220,15 +220,16 @@ export const showProfile = async (req, res) => {
 
     res.status(200).json({ supplier });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to retrieve supplier profile",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({
+        message: "Failed to retrieve supplier profile",
+        error: error.message,
+      });
   }
 };
 
 // Get all suppliers
-
 export const getAllSuppliers = async (req, res) => {
   try {
     const suppliers = await Supplier.find({});
@@ -239,13 +240,15 @@ export const getAllSuppliers = async (req, res) => {
       .json({ message: "Failed to retrieve suppliers", error: error.message });
   }
 };
+
+// Delete Supplier
 export const deleteSupplier = async (req, res) => {
   try {
     const { id } = req.params;
     const supplier = await Supplier.findByIdAndDelete(id);
-    if (!supplier) {
+    if (!supplier)
       return res.status(404).json({ message: "Supplier not found" });
-    }
+
     res.status(200).json({ message: "Supplier deleted successfully" });
   } catch (error) {
     res

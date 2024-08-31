@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { addressSchema } from "./addressSchema.models.js"; // Importing shared address schema
+import { addressSchema } from "./addressSchema.models.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -40,7 +40,11 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     address: [addressSchema],
-
+    role: {
+      type: String,
+      enum: ["admin", "supplier", "user"], // Defined roles
+      default: "user",
+    },
     otp: String,
     isActive: {
       type: Boolean,
@@ -59,6 +63,41 @@ const userSchema = new mongoose.Schema(
         ref: "Card",
       },
     ],
+    // Supplier-specific fields (optional)
+    companyName: {
+      type: String,
+      minlength: 3,
+      maxlength: 100,
+      // Conditional requirement based on role
+      required: function () {
+        return this.role === "supplier";
+      },
+    },
+    vatNumber: {
+      type: String,
+      unique: true,
+      required: function () {
+        return this.role === "supplier";
+      },
+    },
+    contactPerson: {
+      firstname: {
+        type: String,
+        minlength: 2,
+        maxlength: 50,
+        required: function () {
+          return this.role === "supplier";
+        },
+      },
+      lastname: {
+        type: String,
+        minlength: 2,
+        maxlength: 50,
+        required: function () {
+          return this.role === "supplier";
+        },
+      },
+    },
   },
   { timestamps: true }
 );

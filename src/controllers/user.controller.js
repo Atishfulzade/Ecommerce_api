@@ -101,6 +101,7 @@ export const verifyEmail = async (req, res) => {
       .json({ message: "Failed to verify email", error: error.message });
   }
 };
+
 // Login user
 export const loginUser = async (req, res) => {
   try {
@@ -215,6 +216,7 @@ export const resetPassword = async (req, res) => {
   }
 };
 
+// Update user profile
 export const updateProfile = async (req, res) => {
   try {
     const { email, updatedFields } = req.body;

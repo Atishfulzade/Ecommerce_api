@@ -22,8 +22,21 @@ export const createProduct = async (req, res) => {
       });
     }
 
-    const newProduct = new Product(req.body);
+    // Get the file locations from the previous middleware
+    const productImages = req.body.fileLocations;
+
+    // Create a new product object
+    const newProduct = new Product({
+      name,
+      description,
+      product_images: productImages, // Store the signed URLs of uploaded images
+      ...req.body, // Include any additional fields
+    });
+
+    // Save the product to the database
     const savedProduct = await newProduct.save();
+
+    // Send the response
     res.status(201).json(savedProduct);
   } catch (error) {
     console.error("Failed to create product:", error);

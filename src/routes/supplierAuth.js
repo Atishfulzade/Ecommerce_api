@@ -8,6 +8,7 @@ import {
   deleteSupplier,
   getAllSuppliers,
 } from "../controllers/supplier.controller.js";
+import { uploadImagesToS3 } from "../utils/s3_configuration.js";
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.post("/register", registerSupplier);
 router.get("/profile/:id", verifySupplier, showProfile);
 
 // Update supplier details by ID
-router.put("/profile/:id", verifySupplier, updateProfile);
+router.put("/profile/:id", verifySupplier, uploadImagesToS3, updateProfile);
 
 // Delete supplier by ID
 router.delete("/profile/:id", verifySupplier, deleteSupplier);

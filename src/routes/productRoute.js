@@ -8,13 +8,14 @@ import {
   updateProduct,
 } from "../controllers/product.controller.js";
 import { verifySupplier } from "../controllers/supplier.controller.js";
+import { uploadImagesToS3 } from "../utils/s3_configuration.js";
 const router = express.Router();
 
 // Get all products
 router.get("/", getAllProducts);
 
 // Create a new product
-router.post("/", verifySupplier, createProduct);
+router.post("/", verifySupplier, uploadImagesToS3, createProduct);
 
 // Filter products by category
 router.put("/:id", verifySupplier, updateProduct);

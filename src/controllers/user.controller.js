@@ -12,6 +12,12 @@ export const registerUser = async (req, res) => {
   try {
     const { username, firstname, lastname, email, password } = req.body;
 
+    // Basic validation
+    if (!username || !firstname || !lastname || !email || !password) {
+      console.log({ username, firstname, lastname, email, password });
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
     // Check if username or email exists
     const [usernameFound, emailFound] = await Promise.all([
       User.findOne({ username }),
@@ -36,11 +42,28 @@ export const registerUser = async (req, res) => {
       lastname,
       email,
       password: hashedPassword,
+      isVerified: false, // Add a flag to indicate if the user is verified
     });
 
     await user.save();
 
-    res.status(201).json({ message: "User registered successfully" });
+    // Generate JWT token for email verification
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // Send verification email with the token
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+    await sendOtpEmail(
+      user.email,
+      `Please verify your email by clicking on this link: ${verificationLink}`
+    );
+
+    res.status(201).json({
+      message: `User registered successfully. Please verify your email.`,
+    });
   } catch (error) {
     res
       .status(500)
@@ -48,6 +71,36 @@ export const registerUser = async (req, res) => {
   }
 };
 
+// Verify user email
+export const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ message: "No token provided" });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, async (error, decoded) => {
+      if (error) {
+        return res.status(403).json({ message: "Invalid or expired token" });
+      }
+
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      user.isVerified = true;
+      await user.save();
+
+      res.status(200).json({ message: "Email verified successfully" });
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to verify email", error: error.message });
+  }
+};
 // Login user
 export const loginUser = async (req, res) => {
   try {
@@ -162,13 +215,17 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-// Update profile
 export const updateProfile = async (req, res) => {
   try {
     const { email, updatedFields } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (req.fileLocation) {
+      updatedFields.profileImage = req.fileLocation; // Update S3 file location
+    }
+    console.log(req.fileLocation);
 
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
@@ -196,11 +253,9 @@ export const showProfile = async (req, res) => {
 
     res.status(200).json({ user });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to retrieve user profile",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to retrieve user profile",
+      error: error.message,
+    });
   }
 };

@@ -14,9 +14,6 @@ const ProductSchema = new mongoose.Schema(
     type: { type: String },
     suppliers: { type: mongoose.Schema.Types.ObjectId, ref: "Supplier" }, // Reference to User model
 
-    image: { type: String },
-    collage_image: { type: String },
-    collage_image_aspect_ratio: { type: Number },
     trend: { type: String },
     popular: { type: Boolean },
     has_mrp: { type: Boolean },

@@ -10,11 +10,13 @@ import {
   updateProfile,
   verifyUser,
 } from "../controllers/user.controller.js";
-import { uploadImagesToS3 } from "../utils/s3_configuration.js";
+import {
+  uploadImagesToS3,
+  uploadImageToS3,
+} from "../utils/s3_configuration.js";
 
 const router = express.Router();
 
-router.post("/upload", uploadImagesToS3);
 // POST /api/v1/auth/login
 router.post("/login", loginUser);
 
@@ -39,5 +41,5 @@ router.post("/otp", otpVerify);
 // PUT /api/v1/auth/profile (Update profile route)
 
 router.get("/profile", verifyUser, showProfile);
-router.put("/profile", verifyUser, updateProfile);
+router.put("/profile", verifyUser, uploadImageToS3, updateProfile);
 export default router;

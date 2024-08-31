@@ -187,6 +187,9 @@ export const updateProfile = async (req, res) => {
     if (!supplier) {
       return res.status(404).json({ message: "Supplier not found" });
     }
+    if (req.fileLocation) {
+      updatedFields.profileImage = req.fileLocation; // Update S3 file location
+    }
 
     // Handle nested fields and other updates
     const updatedSupplier = await Supplier.findByIdAndUpdate(

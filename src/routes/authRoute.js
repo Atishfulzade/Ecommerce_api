@@ -10,10 +10,7 @@ import {
   updateProfile,
   verifyUser,
 } from "../controllers/user.controller.js";
-import {
-  uploadImagesToS3,
-  uploadImageToS3,
-} from "../utils/s3_configuration.js";
+import { uploadImageToS3 } from "../utils/s3_configuration.js";
 import { authorizeRoles } from "../utils/AuthoriseRole.js";
 
 const router = express.Router();
@@ -27,20 +24,30 @@ router.post("/register", registerUser);
 // POST /api/v1/auth/logout
 router.post("/logout", logOutUser);
 
-// POST /api/v1/auth/send-otp (Step 1: Send OTP for password reset)
-router.post("/send-otp", authorizeRoles("user"), sendOtp);
+// GET /api/v1/auth/send-otp
+router.get("/send-otp", verifyUser, sendOtp);
 
-// POST /api/v1/auth/reset-password (Step 2: Verify OTP and reset password)
+// POST /api/v1/auth/reset-password
 router.post("/reset-password", resetPassword);
 
-// GET /api/v1/auth/otp (Separate route to send OTP via GET request, if needed)
-router.get("/otp", sendOtp);
-
-// POST /api/v1/auth/otp (Verify the OTP sent)
+// POST /api/v1/auth/otp
 router.post("/otp", otpVerify);
 
-// PUT /api/v1/auth/profile (Update profile route)
-
+// GET /api/v1/auth/profile
 router.get("/profile", verifyUser, showProfile);
-router.put("/profile", verifyUser, uploadImageToS3, updateProfile);
+
+// PUT /api/v1/auth/profile
+router.put(
+  "/profile",
+  verifyUser,
+  (req, res, next) => {
+    if (req.file) {
+      uploadImageToS3(req, res, next);
+    } else {
+      next();
+    }
+  },
+  updateProfile
+);
+
 export default router;

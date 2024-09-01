@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { addressSchema } from "./addressSchema.models.js";
+import { cartSchema } from "./cartSchema.models.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -57,6 +58,7 @@ const userSchema = new mongoose.Schema(
     verificationToken: {
       type: String,
     },
+    cart: [cartSchema],
     cards: [
       {
         type: mongoose.Schema.Types.ObjectId,

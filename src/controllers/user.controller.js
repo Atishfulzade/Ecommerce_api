@@ -42,7 +42,6 @@ export const registerUser = async (req, res) => {
       lastname,
       email,
       password: hashedPassword,
-      isVerified: false, // Add a flag to indicate if the user is verified
     });
 
     await user.save();
@@ -220,20 +219,32 @@ export const resetPassword = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { email, updatedFields } = req.body;
+    const restrictedFields = [
+      "isVerified",
+      "role",
+      "_id",
+      "email",
+      "username",
+      "isActive",
+    ]; // Add any other fields you want to restrict
 
+    restrictedFields.forEach((field) => {
+      if (updatedFields.hasOwnProperty(field)) {
+        delete updatedFields[field];
+      }
+    });
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     if (req.fileLocation) {
       updatedFields.profileImage = req.fileLocation; // Update S3 file location
     }
-    console.log(req.fileLocation);
 
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
       { $set: updatedFields },
       { new: true }
-    );
+    ).select("-password -role -isActive  -createdAt -updatedAt");
 
     res
       .status(200)
@@ -250,7 +261,9 @@ export const showProfile = async (req, res) => {
   try {
     const { id } = req.body;
 
-    const user = await User.findById(id);
+    const user = await User.findById(id).select(
+      "-password -role -isActive -isVerified -createdAt -updatedAt"
+    );
     if (!user) return res.status(404).json({ message: "User not found" });
 
     res.status(200).json({ user });

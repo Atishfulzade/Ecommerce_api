@@ -34,7 +34,7 @@ export const uploadImageToS3 = async (req, res, next) => {
 
     try {
       // Convert the image buffer to WebP format using sharp
-      const webpImageBuffer = await sharp(req.file.buffer).webp().toBuffer();
+      const webpImageBuffer = await sharp(req.file?.buffer).webp().toBuffer();
 
       // Generate a unique key for the uploaded file
       const uniqueKey = `uploads/${uuidv4()}.webp`;
@@ -60,16 +60,19 @@ export const uploadImageToS3 = async (req, res, next) => {
         expiresIn: 3600,
       });
 
-      // Successfully uploaded
-      res.status(200).json({
-        message: "File uploaded and converted to WebP successfully",
-        fileLocation: signedUrl,
-      });
+      // Attach the signed URL to the request object
+      req.uploadedFileUrl = signedUrl;
+
+      // Pass control to the next middleware
+      next();
     } catch (conversionError) {
+      console.log(conversionError);
+
       res.status(500).json({ error: conversionError.message });
     }
   });
 };
+
 export const uploadImagesToS3 = async (req, res, next) => {
   upload.array("images", 10)(req, res, async (err) => {
     // Allow up to 10 images
@@ -115,12 +118,13 @@ export const uploadImagesToS3 = async (req, res, next) => {
         })
       );
 
-      // Successfully uploaded
-      res.status(200).json({
-        message: "Files uploaded and converted to WebP successfully",
-        fileLocations: uploadResults,
-      });
+      // Attach the signed URLs to the request object
+      req.uploadedFilesUrls = uploadResults;
+
+      // Pass control to the next middleware
+      next();
     } catch (conversionError) {
+      console.log(conversionError);
       res.status(500).json({ error: conversionError.message });
     }
   });

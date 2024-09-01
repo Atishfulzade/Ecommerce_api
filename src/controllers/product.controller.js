@@ -3,7 +3,9 @@ import { Product } from "../models/productSchema.models.js";
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
+    const products = await Product.find({}).select(
+      "_id name category_name min_catalog_price min_product_price description mall_verified product_images"
+    );
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch products", error });
@@ -13,23 +15,24 @@ export const getAllProducts = async (req, res) => {
 // Create a new product
 export const createProduct = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, product_images } = req.body;
 
     // Check for required fields
-    if (!name || !description) {
+    if (!name || !description || !product_images || !product_images.length) {
       return res.status(400).json({
-        error: "Name and description are required fields.",
+        error:
+          "Name, description, and at least one product image are required fields.",
       });
     }
 
     // Get the file locations from the previous middleware
-    const productImages = req.body.fileLocations;
+    const productImages = req.body.fileLocations || [];
 
     // Create a new product object
     const newProduct = new Product({
       name,
       description,
-      product_images: productImages, // Store the signed URLs of uploaded images
+      product_images: productImages, // Store the array of signed URLs of uploaded images
       ...req.body, // Include any additional fields
     });
 

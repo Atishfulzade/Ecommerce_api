@@ -93,21 +93,29 @@ export const loginSupplier = async (req, res) => {
 };
 
 // Verify JWT
-export const verifySupplier = (req, res, next) => {
+
+export const verifySupplier = async (req, res, next) => {
+  const token = req.header("Authorization").replace("Bearer ", "");
+  if (!token) {
+    return res.status(401).json({ message: "No token, authorization denied" });
+  }
+
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "No token provided" });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const supplier = await Supplier.findById(decoded.id);
 
-    jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
-      if (error) return res.status(403).json({ message: "Invalid token" });
+    if (!supplier) {
+      return res.status(401).json({ message: "User not found" });
+    }
 
-      req.supplier = decoded;
-      next();
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to verify token", error: error.message });
+    req.user = supplier; // Attach user to req object
+    next();
+  } catch (err) {
+    console.error(
+      "Something went wrong with the authentication middleware:",
+      err
+    );
+    res.status(401).json({ message: "Token is not valid" });
   }
 };
 
@@ -220,12 +228,10 @@ export const showProfile = async (req, res) => {
 
     res.status(200).json({ supplier });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to retrieve supplier profile",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to retrieve supplier profile",
+      error: error.message,
+    });
   }
 };
 

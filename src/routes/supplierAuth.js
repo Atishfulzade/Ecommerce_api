@@ -8,7 +8,8 @@ import {
   deleteSupplier,
   getAllSuppliers,
 } from "../controllers/supplier.controller.js";
-import { uploadImagesToS3 } from "../utils/s3_configuration.js";
+import { uploadImageToS3 } from "../utils/s3_configuration.js";
+import { authorizeRoles } from "../utils/AuthoriseRole.js";
 
 const router = express.Router();
 
@@ -19,15 +20,31 @@ router.post("/login", loginSupplier);
 router.post("/register", registerSupplier);
 
 // Get supplier details by ID
-router.get("/profile/:id", verifySupplier, showProfile);
+router.get(
+  "/profile/:id",
+  verifySupplier,
+  authorizeRoles("user", "admin", "supplier"),
+  showProfile
+);
 
 // Update supplier details by ID
-router.put("/profile/:id", verifySupplier, uploadImagesToS3, updateProfile);
+router.put(
+  "/profile/:id",
+  verifySupplier,
+  authorizeRoles("admin", "supplier"),
+  uploadImageToS3,
+  updateProfile
+);
 
 // Delete supplier by ID
-router.delete("/profile/:id", verifySupplier, deleteSupplier);
+router.delete(
+  "/profile/:id",
+  verifySupplier,
+  authorizeRoles("admin"),
+  deleteSupplier
+);
 
 // Get all suppliers route
-router.get("/all", getAllSuppliers);
+router.get("/all", verifySupplier, authorizeRoles("admin"), getAllSuppliers);
 
 export default router;

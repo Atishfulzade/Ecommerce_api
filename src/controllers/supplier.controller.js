@@ -222,7 +222,7 @@ export const showProfile = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const supplier = await Supplier.findById(id);
+    const supplier = await Supplier.findById(id).select("-password");
     if (!supplier)
       return res.status(404).json({ message: "Supplier not found" });
 
@@ -238,7 +238,7 @@ export const showProfile = async (req, res) => {
 // Get all suppliers
 export const getAllSuppliers = async (req, res) => {
   try {
-    const suppliers = await Supplier.find({});
+    const suppliers = await Supplier.find({}).select("-password -updatedAt");
     res.status(200).json(suppliers);
   } catch (error) {
     res

@@ -7,6 +7,7 @@ import {
   deleteCategory,
 } from "../controllers/category.controller.js";
 import { authorizeRoles } from "../utils/AuthoriseRole.js";
+import { verifySupplier } from "../controllers/supplier.controller.js";
 
 const router = express.Router();
 
@@ -17,12 +18,12 @@ router.get("/", getAllCategories);
 router.get("/:id", getCategoryById);
 
 // Route to create a new category
-router.post("/", authorizeRoles("admin"), createCategory);
+router.post("/", verifySupplier, authorizeRoles("admin"), createCategory);
 
 // Route to update a category
-router.put("/:id", authorizeRoles("admin"), updateCategory);
+router.put("/:id", verifySupplier, authorizeRoles("admin"), updateCategory);
 
 // Route to delete a category
-router.delete("/:id", authorizeRoles("admin"), deleteCategory);
+router.delete("/:id", verifySupplier, authorizeRoles("admin"), deleteCategory);
 
 export default router;

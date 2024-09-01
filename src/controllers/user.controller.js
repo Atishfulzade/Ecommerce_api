@@ -4,8 +4,17 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { generateOTP } from "../utils/generateOtp.js";
 import { sendOtpEmail } from "../utils/sendMail.js";
+import _ from "lodash";
 
 dotenv.config();
+
+// Utility function for error handling
+const handleError = (res, message, error = null, status = 500) => {
+  console.error(message, error);
+  res
+    .status(status)
+    .json({ message, error: error ? error.message : undefined });
+};
 
 // Register new user
 export const registerUser = async (req, res) => {
@@ -14,7 +23,6 @@ export const registerUser = async (req, res) => {
 
     // Basic validation
     if (!username || !firstname || !lastname || !email || !password) {
-      console.log({ username, firstname, lastname, email, password });
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -61,12 +69,10 @@ export const registerUser = async (req, res) => {
     );
 
     res.status(201).json({
-      message: `User registered successfully. Please verify your email.`,
+      message: "User registered successfully. Please verify your email.",
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to register user", error: error.message });
+    handleError(res, "Failed to register user", error);
   }
 };
 
@@ -95,9 +101,7 @@ export const verifyEmail = async (req, res) => {
       res.status(200).json({ message: "Email verified successfully" });
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to verify email", error: error.message });
+    handleError(res, "Failed to verify email", error);
   }
 };
 
@@ -124,9 +128,7 @@ export const loginUser = async (req, res) => {
 
     res.json({ message: "Logged in successfully", token });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to login user", error: error.message });
+    handleError(res, "Failed to login user", error);
   }
 };
 
@@ -143,9 +145,7 @@ export const verifyUser = (req, res, next) => {
       next();
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to verify token", error: error.message });
+    handleError(res, "Failed to verify token", error);
   }
 };
 
@@ -168,9 +168,7 @@ export const sendOtp = async (req, res) => {
 
     res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to send OTP", error: error.message });
+    handleError(res, "Failed to send OTP", error);
   }
 };
 
@@ -186,9 +184,7 @@ export const otpVerify = async (req, res) => {
     req.session.otp = null; // Clear OTP after verification
     res.status(200).json({ message: "OTP verified successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to verify OTP", error: error.message });
+    handleError(res, "Failed to verify OTP", error);
   }
 };
 
@@ -209,9 +205,7 @@ export const resetPassword = async (req, res) => {
     req.session.otp = null; // Clear OTP after password reset
     res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to reset password", error: error.message });
+    handleError(res, "Failed to reset password", error);
   }
 };
 
@@ -219,6 +213,8 @@ export const resetPassword = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { email, updatedFields } = req.body;
+
+    // Define restricted fields
     const restrictedFields = [
       "isVerified",
       "role",
@@ -226,33 +222,29 @@ export const updateProfile = async (req, res) => {
       "email",
       "username",
       "isActive",
-    ]; // Add any other fields you want to restrict
+    ];
 
-    restrictedFields.forEach((field) => {
-      if (updatedFields.hasOwnProperty(field)) {
-        delete updatedFields[field];
-      }
-    });
+    // Filter out restricted fields
+    const filteredFields = _.omit(updatedFields, restrictedFields);
+
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     if (req.fileLocation) {
-      updatedFields.profileImage = req.fileLocation; // Update S3 file location
+      filteredFields.profileImage = req.fileLocation; // Update S3 file location
     }
 
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
-      { $set: updatedFields },
+      { $set: filteredFields },
       { new: true }
-    ).select("-password -role -isActive  -createdAt -updatedAt");
+    ).select("-password -role -isActive -createdAt -updatedAt");
 
     res
       .status(200)
       .json({ message: "Profile updated successfully", user: updatedUser });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Unable to update profile", error: error.message });
+    handleError(res, "Unable to update profile", error);
   }
 };
 
@@ -268,9 +260,16 @@ export const showProfile = async (req, res) => {
 
     res.status(200).json({ user });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to retrieve user profile",
-      error: error.message,
-    });
+    handleError(res, "Failed to retrieve user profile", error);
+  }
+};
+
+// Get all users
+export const allUsers = async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.status(200).json({ users });
+  } catch (error) {
+    handleError(res, "Failed to retrieve users", error);
   }
 };

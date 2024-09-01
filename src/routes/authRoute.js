@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  allUsers,
   loginUser,
   logOutUser,
   otpVerify,
@@ -36,6 +37,7 @@ router.post("/otp", otpVerify);
 // GET /api/v1/auth/profile
 router.get("/profile", verifyUser, showProfile);
 
+router.get("/", authorizeRoles("admin"), allUsers);
 // PUT /api/v1/auth/profile
 router.put(
   "/profile",

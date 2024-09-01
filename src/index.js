@@ -3,6 +3,7 @@ import "dotenv/config";
 import cors from "cors";
 import productRoute from "./routes/productRoute.js";
 import authRoute from "./routes/authRoute.js";
+import categoryRoute from "./routes/categoryRoute.js";
 import supplierAuth from "./routes/supplierAuth.js";
 import cookieParser from "cookie-parser";
 import { connect } from "./db/conn.js";
@@ -30,6 +31,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1/products", productRoute);
 app.use("/api/v1/user", authRoute);
 app.use("/api/v1/supplier", supplierAuth);
+app.use("/api/v1/categoty", categoryRoute);
 
 connect();
 const PORT = process.env.PORT || 3000;

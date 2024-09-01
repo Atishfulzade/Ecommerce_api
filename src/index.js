@@ -8,6 +8,8 @@ import supplierAuth from "./routes/supplierAuth.js";
 import cookieParser from "cookie-parser";
 import { connect } from "./db/conn.js";
 import session from "express-session";
+import paymentRoute from "./routes/paymentRoute.js";
+import orderRoute from "./routes/orderRoute.js";
 
 const app = express();
 
@@ -32,6 +34,8 @@ app.use("/api/v1/products", productRoute);
 app.use("/api/v1/user", authRoute);
 app.use("/api/v1/supplier", supplierAuth);
 app.use("/api/v1/category", categoryRoute);
+app.use("/api/v1/payments", paymentRoute);
+app.use("/api/v1/order", orderRoute);
 
 connect();
 const PORT = process.env.PORT || 3000;

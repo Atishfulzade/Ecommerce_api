@@ -2,7 +2,7 @@ import { User } from "../models/userSchema.models.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import { generateOTP } from "../utils/generateOtp.js";
+import { generateOTP } from "../utils/generateOTP.js";
 import { sendOtpEmail } from "../utils/sendMail.js";
 import _ from "lodash";
 

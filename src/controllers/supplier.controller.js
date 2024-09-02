@@ -2,7 +2,7 @@ import { Supplier } from "../models/supplierSchema.models.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import { generateOTP } from "../utils/generateOtp.js";
+import { generateOTP } from "../utils/generateOTP.js";
 import { sendOtpEmail } from "../utils/sendMail.js";
 
 dotenv.config();

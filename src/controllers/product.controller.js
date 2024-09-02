@@ -8,7 +8,10 @@ export const getAllProducts = async (req, res) => {
     );
     res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch products", error });
+    console.error("Failed to fetch products:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch products", error: error.message });
   }
 };
 
@@ -20,7 +23,7 @@ export const createProduct = async (req, res) => {
     // Check for required fields
     if (!name || !description || !product_images || !product_images.length) {
       return res.status(400).json({
-        error:
+        message:
           "Name, description, and at least one product image are required fields.",
       });
     }
@@ -40,10 +43,14 @@ export const createProduct = async (req, res) => {
     const savedProduct = await newProduct.save();
 
     // Send the response
-    res.status(201).json(savedProduct);
+    res
+      .status(201)
+      .json({ message: "Product created successfully", product: savedProduct });
   } catch (error) {
     console.error("Failed to create product:", error);
-    res.status(500).json({ error: "Failed to create product" });
+    res
+      .status(500)
+      .json({ message: "Failed to create product", error: error.message });
   }
 };
 
@@ -66,8 +73,10 @@ export const filterProduct = async (req, res) => {
 
     res.status(200).json(products);
   } catch (error) {
-    console.log("Unable to filter products", error);
-    res.status(500).json({ message: error.message });
+    console.error("Unable to filter products:", error);
+    res
+      .status(500)
+      .json({ message: "Unable to filter products", error: error.message });
   }
 };
 
@@ -82,7 +91,9 @@ export const findById = async (req, res) => {
     res.status(200).json(product);
   } catch (error) {
     console.error("Failed to find product:", error);
-    res.status(500).json({ error: "Failed to find product" });
+    res
+      .status(500)
+      .json({ message: "Failed to find product", error: error.message });
   }
 };
 
@@ -90,7 +101,7 @@ export const findById = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const updatedField = req.body;
+    const updatedFields = req.body;
 
     const product = await Product.findById(id);
 
@@ -98,12 +109,13 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    Object.assign(product, updatedField);
+    Object.assign(product, updatedFields);
 
     await product.save();
 
     res.status(200).json({ message: "Product updated successfully", product });
   } catch (error) {
+    console.error("Couldn't update product:", error);
     res
       .status(500)
       .json({ message: "Couldn't update product", error: error.message });
@@ -123,6 +135,7 @@ export const deleteProduct = async (req, res) => {
 
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
+    console.error("Failed to delete product:", error);
     res
       .status(500)
       .json({ message: "Failed to delete product", error: error.message });

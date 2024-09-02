@@ -126,6 +126,12 @@ export const loginUser = async (req, res) => {
       { expiresIn: "1h" }
     );
 
+    // Set user info in session
+    req.session.user = {
+      id: user._id,
+      email: user.email,
+    };
+
     res.json({ message: "Logged in successfully", token });
   } catch (error) {
     handleError(res, "Failed to login user", error);
@@ -151,7 +157,12 @@ export const verifyUser = (req, res, next) => {
 
 // Logout user
 export const logOutUser = (req, res) => {
-  res.json({ message: "Logged out successfully" });
+  req.session.destroy((err) => {
+    if (err) {
+      return handleError(res, "Failed to log out", err);
+    }
+    res.json({ message: "Logged out successfully" });
+  });
 };
 
 // Send OTP and store in session
@@ -164,7 +175,7 @@ export const sendOtp = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     req.session.otp = generatedOtp;
-    await sendOtpEmail(user.email, generatedOtp);
+    await sendOtpEmail(user.email, `Your OTP is: ${generatedOtp}`);
 
     res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {

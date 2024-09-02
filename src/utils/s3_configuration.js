@@ -25,7 +25,10 @@ const upload = multer({ storage });
 export const uploadImageToS3 = async (req, res, next) => {
   upload.single("image")(req, res, async (err) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      console.error("Upload error:", err);
+      return res
+        .status(500)
+        .json({ error: "Image upload failed", details: err.message });
     }
 
     if (!req.file) {
@@ -34,7 +37,7 @@ export const uploadImageToS3 = async (req, res, next) => {
 
     try {
       // Convert the image buffer to WebP format using sharp
-      const webpImageBuffer = await sharp(req.file?.buffer).webp().toBuffer();
+      const webpImageBuffer = await sharp(req.file.buffer).webp().toBuffer();
 
       // Generate a unique key for the uploaded file
       const uniqueKey = `uploads/${uuidv4()}.webp`;
@@ -42,21 +45,21 @@ export const uploadImageToS3 = async (req, res, next) => {
       // Define S3 upload parameters
       const uploadParams = {
         Bucket: process.env.AWS_BUCKET_NAME,
-        Key: uniqueKey, // Use the generated key
+        Key: uniqueKey,
         Body: webpImageBuffer,
         ContentType: "image/webp",
       };
 
-      // Upload the converted image to S3 using AWS SDK v3
-      const command = new PutObjectCommand(uploadParams);
-      await s3Client.send(command);
+      // Upload the converted image to S3
+      const uploadCommand = new PutObjectCommand(uploadParams);
+      await s3Client.send(uploadCommand);
 
-      // Generate a signed URL for the uploaded image using the same key
-      const getcommand = new GetObjectCommand({
+      // Generate a signed URL for the uploaded image
+      const getObjectCommand = new GetObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: uniqueKey,
       });
-      const signedUrl = await getSignedUrl(s3Client, getcommand, {
+      const signedUrl = await getSignedUrl(s3Client, getObjectCommand, {
         expiresIn: 3600,
       });
 
@@ -66,18 +69,25 @@ export const uploadImageToS3 = async (req, res, next) => {
       // Pass control to the next middleware
       next();
     } catch (conversionError) {
-      console.log(conversionError);
-
-      res.status(500).json({ error: conversionError.message });
+      console.error("Image conversion/upload error:", conversionError);
+      res
+        .status(500)
+        .json({
+          error: "Image processing or upload failed",
+          details: conversionError.message,
+        });
     }
   });
 };
 
+// Function to handle multiple image uploads, conversion to WebP, and upload to S3
 export const uploadImagesToS3 = async (req, res, next) => {
   upload.array("images", 10)(req, res, async (err) => {
-    // Allow up to 10 images
     if (err) {
-      return res.status(500).json({ error: err.message });
+      console.error("Upload error:", err);
+      return res
+        .status(500)
+        .json({ error: "Images upload failed", details: err.message });
     }
 
     if (!req.files || req.files.length === 0) {
@@ -96,21 +106,21 @@ export const uploadImagesToS3 = async (req, res, next) => {
           // Define S3 upload parameters
           const uploadParams = {
             Bucket: process.env.AWS_BUCKET_NAME,
-            Key: uniqueKey, // Use the generated key
+            Key: uniqueKey,
             Body: webpImageBuffer,
             ContentType: "image/webp",
           };
 
-          // Upload the converted image to S3 using AWS SDK v3
-          const command = new PutObjectCommand(uploadParams);
-          await s3Client.send(command);
+          // Upload the converted image to S3
+          const uploadCommand = new PutObjectCommand(uploadParams);
+          await s3Client.send(uploadCommand);
 
-          // Generate a signed URL for the uploaded image using the same key
-          const getcommand = new GetObjectCommand({
+          // Generate a signed URL for the uploaded image
+          const getObjectCommand = new GetObjectCommand({
             Bucket: process.env.AWS_BUCKET_NAME,
             Key: uniqueKey,
           });
-          const signedUrl = await getSignedUrl(s3Client, getcommand, {
+          const signedUrl = await getSignedUrl(s3Client, getObjectCommand, {
             expiresIn: 3600,
           });
 
@@ -124,8 +134,13 @@ export const uploadImagesToS3 = async (req, res, next) => {
       // Pass control to the next middleware
       next();
     } catch (conversionError) {
-      console.log(conversionError);
-      res.status(500).json({ error: conversionError.message });
+      console.error("Image conversion/upload error:", conversionError);
+      res
+        .status(500)
+        .json({
+          error: "Image processing or upload failed",
+          details: conversionError.message,
+        });
     }
   });
 };

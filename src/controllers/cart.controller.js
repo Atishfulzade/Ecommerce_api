@@ -1,92 +1,115 @@
 import { Cart } from "../models/cartSchema.models.js";
+import mongoose from "mongoose";
 
+// Helper function to validate ObjectID format
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+// Get cart for a user
 export const getCart = async (req, res) => {
   try {
-    const cart = await Cart.find(); // Fetch all cart items from the database
-    if (cart.length > 0) {
-      res.json(cart); // Return the cart items if found
-    } else {
-      res.status(404).json({ message: "Cart is empty" }); // Return 404 if no cart items are found
+    const { userId } = req.query; // Use query params for userId
+
+    if (!userId || !isValidObjectId(userId)) {
+      return res.status(400).json({ message: "Invalid or missing User ID" });
     }
+
+    const cart = await Cart.findOne({ userId });
+
+    if (!cart || cart.products.length === 0) {
+      return res.status(404).json({ message: "Cart is empty" });
+    }
+
+    res.status(200).json(cart);
   } catch (error) {
-    res.status(500).json({ message: error.message }); // Return 500 for server errors
+    console.error("Failed to fetch cart:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch cart", error: error.message });
   }
 };
 
+// Add product to cart
 export const addToCart = async (req, res) => {
   try {
     const { userId, productId, quantity } = req.body;
 
-    if (!userId || !productId || !quantity) {
+    if (
+      !userId ||
+      !productId ||
+      quantity == null ||
+      !isValidObjectId(userId) ||
+      !isValidObjectId(productId)
+    ) {
       return res
         .status(400)
-        .json({ message: "User ID, product ID, and quantity are required" });
+        .json({
+          message:
+            "User ID, product ID, and quantity are required and must be valid",
+        });
     }
 
-    // Find the user's cart
     let userCart = await Cart.findOne({ userId });
 
     if (!userCart) {
-      // If the cart doesn't exist, create a new one
       userCart = new Cart({ userId, products: [{ productId, quantity }] });
     } else {
-      // Check if the product already exists in the cart
       const productIndex = userCart.products.findIndex(
         (product) => product.productId.toString() === productId
       );
 
       if (productIndex > -1) {
-        // If the product exists, update the quantity
         userCart.products[productIndex].quantity += quantity;
       } else {
-        // If the product doesn't exist, add it to the products array
         userCart.products.push({ productId, quantity });
       }
     }
 
-    // Save the updated cart to the database
     await userCart.save();
-
     res
       .status(200)
       .json({ message: "Product added to cart successfully", cart: userCart });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Failed to add product to cart:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to add product to cart", error: error.message });
   }
 };
 
-// Update the quantity or other fields of a product in the cart
+// Update cart item quantity
 export const editCartItem = async (req, res) => {
   try {
     const { userId, productId, quantity } = req.body;
 
-    if (!userId || !productId || quantity == null) {
+    if (
+      !userId ||
+      !productId ||
+      quantity == null ||
+      quantity <= 0 ||
+      !isValidObjectId(userId) ||
+      !isValidObjectId(productId)
+    ) {
       return res
         .status(400)
         .json({
-          message: "User ID, product ID, and new quantity are required",
+          message: "User ID, product ID, and valid quantity are required",
         });
     }
 
-    // Find the user's cart
     let userCart = await Cart.findOne({ userId });
 
     if (!userCart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    // Find the product in the cart
     const productIndex = userCart.products.findIndex(
       (product) => product.productId.toString() === productId
     );
 
     if (productIndex > -1) {
-      // Update the product's quantity
       userCart.products[productIndex].quantity = quantity;
 
-      // Save the updated cart to the database
       await userCart.save();
-
       res
         .status(200)
         .json({ message: "Cart item updated successfully", cart: userCart });
@@ -94,7 +117,10 @@ export const editCartItem = async (req, res) => {
       res.status(404).json({ message: "Product not found in the cart" });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Failed to update cart item:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to update cart item", error: error.message });
   }
 };
 
@@ -103,31 +129,33 @@ export const deleteCart = async (req, res) => {
   try {
     const { userId, productId } = req.body;
 
-    if (!userId || !productId) {
+    if (
+      !userId ||
+      !productId ||
+      !isValidObjectId(userId) ||
+      !isValidObjectId(productId)
+    ) {
       return res
         .status(400)
-        .json({ message: "User ID and product ID are required" });
+        .json({
+          message: "User ID and product ID are required and must be valid",
+        });
     }
 
-    // Find the user's cart
     let userCart = await Cart.findOne({ userId });
 
     if (!userCart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    // Find the product in the cart
     const productIndex = userCart.products.findIndex(
       (product) => product.productId.toString() === productId
     );
 
     if (productIndex > -1) {
-      // Remove the product from the cart
       userCart.products.splice(productIndex, 1);
 
-      // Save the updated cart to the database
       await userCart.save();
-
       res
         .status(200)
         .json({
@@ -138,6 +166,12 @@ export const deleteCart = async (req, res) => {
       res.status(404).json({ message: "Product not found in the cart" });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Failed to delete product from cart:", error);
+    res
+      .status(500)
+      .json({
+        message: "Failed to delete product from cart",
+        error: error.message,
+      });
   }
 };

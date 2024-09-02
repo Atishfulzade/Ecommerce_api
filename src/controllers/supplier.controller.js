@@ -93,35 +93,37 @@ export const loginSupplier = async (req, res) => {
 };
 
 // Verify JWT
-
 export const verifySupplier = async (req, res, next) => {
-  const token = req.header("Authorization").replace("Bearer ", "");
-  if (!token) {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+  if (!token)
     return res.status(401).json({ message: "No token, authorization denied" });
-  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const supplier = await Supplier.findById(decoded.id);
 
-    if (!supplier) {
-      return res.status(401).json({ message: "User not found" });
-    }
+    if (!supplier)
+      return res.status(401).json({ message: "Supplier not found" });
 
     req.user = supplier; // Attach user to req object
     next();
   } catch (err) {
-    console.error(
-      "Something went wrong with the authentication middleware:",
-      err
-    );
+    console.error("Error with authentication middleware:", err);
     res.status(401).json({ message: "Token is not valid" });
   }
 };
 
 // Logout Supplier
 export const logOutSupplier = (req, res) => {
-  res.json({ message: "Logged out successfully" });
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error during logout:", err);
+      return res
+        .status(500)
+        .json({ message: "Failed to log out", error: err.message });
+    }
+    res.json({ message: "Logged out successfully" });
+  });
 };
 
 // Send OTP and store in session
@@ -135,7 +137,7 @@ export const sendOtp = async (req, res) => {
       return res.status(404).json({ message: "Supplier not found" });
 
     req.session.otp = generatedOtp;
-    await sendOtpEmail(supplier.email, generatedOtp);
+    await sendOtpEmail(supplier.email, `Your OTP is: ${generatedOtp}`);
 
     res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
@@ -228,10 +230,12 @@ export const showProfile = async (req, res) => {
 
     res.status(200).json({ supplier });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to retrieve supplier profile",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({
+        message: "Failed to retrieve supplier profile",
+        error: error.message,
+      });
   }
 };
 

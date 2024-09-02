@@ -41,7 +41,7 @@ if (!sessionSecret) {
 }
 
 if (!mongoUri) {
-  console.error("MONGO_URI is not set");
+  console.error("MONGODB_URI is not set");
 }
 
 app.use(

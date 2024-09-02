@@ -15,7 +15,6 @@ export const getPaymentStatus = (req, res) => {
 
 export const getPaymentHistory = (req, res) => {
   const userId = req.params.userId;
-  // Logic to retrieve payment history for the user
   res.json({ message: `Payment history for User ID: ${userId}` });
 };
 

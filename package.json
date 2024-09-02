@@ -12,9 +12,11 @@
     "Product Management",
     "Payment Integration"
   ],
-  "description": "This project is the backend of an e-commerce platform called Meeshio, inspired by Meesho. It provides a robust API for handling user authentication, product management, cart and wishlist functionalities, order processing, and payment integration. The backend is built using Node.js and Express, with MongoDB as the database, ensuring scalability and flexibility. This backend manages all core operations and interacts seamlessly with the frontend to deliver a smooth user experience for customers, sellers, and administrators.",
+  "description": "Backend of an e-commerce platform called Meeshio.",
   "main": "index.js",
   "scripts": {
+    "build": "echo 'No build step required'",
+    "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
   "author": "Atish Fulzade",

@@ -11,7 +11,11 @@ import session from "express-session";
 import paymentRoute from "./routes/paymentRoute.js";
 import orderRoute from "./routes/orderRoute.js";
 import cartRoute from "./routes/cartRoute.js";
-
+import path from "path";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const app = express();
 
 app.use(cors());
@@ -28,7 +32,7 @@ app.use(
   })
 );
 app.get("/", (req, res) => {
-  res.send("Hello, World!");
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.use("/api/v1/products", productRoute);

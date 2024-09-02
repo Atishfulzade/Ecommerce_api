@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Routes Documentation</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
+    />
+    <style>
+      body {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f5f5f5;
+      }
+      .sidebar {
+        min-width: 250px;
+        background-color: #4a4a4a;
+        color: #fff;
+        padding: 20px;
+      }
+      .sidebar a {
+        color: #fff;
+        text-decoration: none;
+        margin-bottom: 10px;
+        display: block;
+      }
+      .sidebar a:hover {
+        background-color: #363636;
+        padding-left: 10px;
+      }
+      .content {
+        flex: 1;
+        padding: 20px;
+      }
+      .route-info {
+        margin-bottom: 20px;
+      }
+      .route-info h3 {
+        border-bottom: 2px solid #00d1b2;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+      }
+      pre {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <h2 class="title is-4 has-text-white">API Routes</h2>
+      <nav>
+        <a href="#userRoutes">User Routes</a>
+        <a href="#supplierRoutes">Supplier Routes</a>
+        <a href="#productRoutes">Product Routes</a>
+        <a href="#paymentRoutes">Payment Routes</a>
+        <a href="#orderRoutes">Order Routes</a>
+        <a href="#categoryRoutes">Category Routes</a>
+        <a href="#cartRoutes">Cart Routes</a>
+      </nav>
+    </div>
+
+    <div class="content">
+      <section id="userRoutes" class="route-info">
+        <h3 class="title is-5">User Routes</h3>
+        <p><strong>POST /api/v1/auth/login</strong>: Log in a user.</p>
+        <p><strong>POST /api/v1/auth/register</strong>: Register a new user.</p>
+        <p><strong>POST /api/v1/auth/logout</strong>: Log out a user.</p>
+        <p>
+          <strong>GET /api/v1/auth/send-otp</strong>: Send OTP for verification.
+        </p>
+        <p>
+          <strong>POST /api/v1/auth/reset-password</strong>: Reset user
+          password.
+        </p>
+        <p><strong>POST /api/v1/auth/otp</strong>: Verify OTP.</p>
+        <p><strong>GET /api/v1/auth/profile</strong>: Show user profile.</p>
+        <p><strong>GET /api/v1/auth/</strong>: Get all users (Admin only).</p>
+        <p>
+          <strong>PUT /api/v1/auth/profile</strong>: Update user profile with
+          optional image upload.
+        </p>
+      </section>
+
+      <section id="supplierRoutes" class="route-info">
+        <h3 class="title is-5">Supplier Routes</h3>
+        <p><strong>POST /login</strong>: Log in a supplier.</p>
+        <p><strong>POST /register</strong>: Register a new supplier.</p>
+        <p><strong>GET /profile/:id</strong>: Get supplier details by ID.</p>
+        <p><strong>PUT /profile/:id</strong>: Update supplier details by ID.</p>
+        <p><strong>DELETE /profile/:id</strong>: Delete supplier by ID.</p>
+        <p><strong>GET /all</strong>: Get all suppliers (Admin only).</p>
+      </section>
+
+      <section id="productRoutes" class="route-info">
+        <h3 class="title is-5">Product Routes</h3>
+        <p><strong>GET /</strong>: Get all products.</p>
+        <p><strong>POST /</strong>: Create a new product.</p>
+        <p><strong>PUT /:id</strong>: Update a product by ID.</p>
+        <p><strong>DELETE /:id</strong>: Delete a product by ID.</p>
+        <p><strong>GET /filter</strong>: Filter products by category.</p>
+        <p><strong>GET /:id</strong>: Get a product by ID.</p>
+      </section>
+
+      <section id="paymentRoutes" class="route-info">
+        <h3 class="title is-5">Payment Routes</h3>
+        <p><strong>POST /payment</strong>: Process a payment.</p>
+        <p>
+          <strong>GET /payment/status/:transactionId</strong>: Get payment
+          status by transaction ID.
+        </p>
+        <p>
+          <strong>GET /payment/history/:userId</strong>: Get payment history for
+          a user by ID.
+        </p>
+        <p>
+          <strong>POST /payment/refund/:transactionId</strong>: Initiate a
+          refund by transaction ID.
+        </p>
+        <p>
+          <strong>GET /payment/methods</strong>: Get available payment methods.
+        </p>
+      </section>
+
+      <section id="orderRoutes" class="route-info">
+        <h3 class="title is-5">Order Routes</h3>
+        <p><strong>POST /</strong>: Create a new order.</p>
+        <p><strong>GET /</strong>: Get all orders.</p>
+        <p><strong>GET /:id</strong>: Get order details by ID.</p>
+        <p><strong>PUT /:id</strong>: Update an order by ID.</p>
+        <p><strong>DELETE /:id</strong>: Delete an order by ID.</p>
+      </section>
+
+      <section id="categoryRoutes" class="route-info">
+        <h3 class="title is-5">Category Routes</h3>
+        <p><strong>GET /</strong>: Get all categories.</p>
+        <p><strong>GET /:id</strong>: Get a category by ID.</p>
+        <p><strong>POST /</strong>: Create a new category.</p>
+        <p><strong>PUT /:id</strong>: Update a category by ID.</p>
+        <p><strong>DELETE /:id</strong>: Delete a category by ID.</p>
+      </section>
+
+      <section id="cartRoutes" class="route-info">
+        <h3 class="title is-5">Cart Routes</h3>
+        <p><strong>GET /</strong>: Fetch all items in the cart.</p>
+        <p><strong>POST /</strong>: Add a new item to the cart.</p>
+        <p>
+          <strong>PUT /:itemId</strong>: Update a specific item in the cart.
+        </p>
+        <p>
+          <strong>DELETE /:itemId</strong>: Remove a specific item from the
+          cart.
+        </p>
+      </section>
+    </div>
+  </body>
+</html>

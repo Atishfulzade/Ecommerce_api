@@ -50,7 +50,7 @@ app.use(
     resave: false,
     saveUninitialized: true,
     store: MongoStore.create({ mongoUrl: mongoUri }),
-    cookie: { secure: process.env.NODE_ENV === "production" }, // Set to true only in production
+    cookie: { secure: process.env.NODE_ENV === "production" }, // Adjust based on environment
   })
 );
 

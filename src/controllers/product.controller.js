@@ -74,7 +74,7 @@ export const filterProduct = async (req, res) => {
 // Find product by ID
 export const findById = async (req, res) => {
   try {
-    const { id } = req.params; // Correct destructuring
+    const { id } = req.params;
     const product = await Product.findById(id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });

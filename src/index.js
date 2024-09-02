@@ -22,13 +22,14 @@ app.use(cors());
 app.use(cookieParser());
 app.use(express.json({ limit: "20kb" }));
 app.use(express.urlencoded({ extended: true }));
+
 app.disable("x-powered-by");
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, // Store your secret in .env
-    resave: false, // Forces the session to be saved back to the session store
-    saveUninitialized: true, // Forces a session that is "uninitialized" to be saved
-    cookie: { secure: false }, // Set to true if using HTTPS
+    secret: process.env.SESSION_SECRET, // Add this line
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }, // Set secure to true if using HTTPS
   })
 );
 app.get("/", (req, res) => {

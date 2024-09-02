@@ -1,11 +1,11 @@
 import express from "express";
-import { verifyUser } from "../controllers/user.controller";
+import { verifyUser } from "../controllers/user.controller.js";
 import {
   addToCart,
   deleteCart,
   editCartItem,
   getCart,
-} from "../controllers/cart.controller";
+} from "../controllers/cart.controller.js";
 
 const router = express.Router();
 

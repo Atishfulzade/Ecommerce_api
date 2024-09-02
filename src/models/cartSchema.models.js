@@ -4,14 +4,14 @@ export const cartSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Ensure this matches your user model name
+      ref: "User", // Reference to the User model
       required: true,
     },
     products: [
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId, // Reference to the Product model
-          ref: "Product", // Ensure this matches your product model name
+          ref: "Product", // Reference to the Product model
           required: true,
         },
         quantity: {
@@ -22,7 +22,7 @@ export const cartSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
-); // Automatically adds createdAt and updatedAt fields
+  { timestamps: true } // Automatically adds createdAt and updatedAt fields
+);
 
 export const Cart = mongoose.model("Cart", cartSchema);

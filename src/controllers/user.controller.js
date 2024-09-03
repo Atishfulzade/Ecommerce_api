@@ -188,6 +188,8 @@ export const otpVerify = async (req, res) => {
   try {
     const { otp } = req.body;
     const storedOtp = req.session.otp;
+    console.log(storedOtp);
+    console.log(otp);
 
     if (otp !== storedOtp)
       return res.status(401).json({ message: "Invalid OTP" });

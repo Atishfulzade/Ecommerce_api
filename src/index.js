@@ -48,9 +48,15 @@ app.use(
   session({
     secret: sessionSecret,
     resave: false,
-    saveUninitialized: true,
-    store: MongoStore.create({ mongoUrl: mongoUri }),
-    cookie: { secure: process.env.NODE_ENV === "production" }, // Adjust based on environment
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: mongoUri,
+      ttl: 14 * 24 * 60 * 60, // 14 days expiration
+    }),
+    cookie: {
+      secure: true, // set to true if using HTTPS
+      maxAge: 60000, // 1 minute for example
+    },
   })
 );
 

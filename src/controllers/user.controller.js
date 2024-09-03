@@ -188,8 +188,13 @@ export const otpVerify = async (req, res) => {
   try {
     const { otp } = req.body;
     const storedOtp = req.session.otp;
-    console.log(storedOtp);
-    console.log(otp);
+
+    console.log("Stored OTP:", storedOtp);
+    console.log("Provided OTP:", otp);
+
+    if (!storedOtp) {
+      return res.status(400).json({ message: "OTP not found in session" });
+    }
 
     if (otp !== storedOtp)
       return res.status(401).json({ message: "Invalid OTP" });
@@ -197,7 +202,8 @@ export const otpVerify = async (req, res) => {
     req.session.otp = null; // Clear OTP after verification
     res.status(200).json({ message: "OTP verified successfully" });
   } catch (error) {
-    handleError(res, "Failed to verify OTP", error);
+    console.error("Error verifying OTP:", error);
+    res.status(500).json({ message: "Failed to verify OTP", error });
   }
 };
 

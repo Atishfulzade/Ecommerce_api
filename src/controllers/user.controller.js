@@ -175,6 +175,8 @@ export const sendOtp = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     req.session.otp = generatedOtp;
+    console.log("OTP set in session:", req.session.otp);
+    res.status(200).json({ message: "OTP generated and stored in session" });
     await sendOtpEmail(user.email, `Your OTP is: ${generatedOtp}`);
 
     res.status(200).json({ message: "OTP sent successfully" });

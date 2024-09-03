@@ -15,7 +15,18 @@ const router = express.Router();
 router.get("/", getAllProducts);
 
 // Create a new product
-router.post("/", verifySupplier, uploadImagesToS3, createProduct);
+router.post(
+  "/",
+  verifySupplier,
+  (req, res, next) => {
+    if (req.files) {
+      uploadImagesToS3(req, res, next);
+    } else {
+      next();
+    }
+  },
+  createProduct
+);
 
 // Filter products by category
 router.put("/:id", verifySupplier, updateProduct);

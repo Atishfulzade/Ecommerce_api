@@ -4,20 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>API Routes Documentation</title>
+    <!-- Bootstrap CSS -->
     <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
     />
     <style>
       body {
-        display: flex;
-        min-height: 100vh;
         background-color: #f5f5f5;
+        height: 100vh;
       }
       .sidebar {
-        min-width: 250px;
-        background-color: #4a4a4a;
-        color: #fff;
+        min-height: 100vh;
+        background-color: #343a40;
         padding: 20px;
       }
       .sidebar a {
@@ -25,25 +24,21 @@
         text-decoration: none;
         margin-bottom: 10px;
         display: block;
+        border-radius: 10px;
       }
       .sidebar a:hover {
-        background-color: #363636;
-        padding-left: 10px;
+        background-color: #495057;
+        border-radius: 10px;
+        color: #f5f5f5;
+        transition: cubic-bezier(0.075, 0.82, 0.165, 1);
       }
       .content {
-        flex: 1;
         padding: 20px;
-      }
-      .route-info {
-        margin-bottom: 20px;
-      }
-      .route-info h3 {
-        border-bottom: 2px solid #00d1b2;
-        padding-bottom: 5px;
-        margin-bottom: 10px;
+        background-color: #fff;
+        min-height: 100vh;
       }
       pre {
-        background-color: #f5f5f5;
+        background-color: #e2e2e2;
         padding: 10px;
         border-radius: 5px;
         overflow-x: auto;
@@ -51,111 +46,431 @@
     </style>
   </head>
   <body>
-    <div class="sidebar">
-      <h2 class="title is-4 has-text-white">API Routes</h2>
-      <nav>
-        <a href="#userRoutes">User Routes</a>
-        <a href="#supplierRoutes">Supplier Routes</a>
-        <a href="#productRoutes">Product Routes</a>
-        <a href="#paymentRoutes">Payment Routes</a>
-        <a href="#orderRoutes">Order Routes</a>
-        <a href="#categoryRoutes">Category Routes</a>
-        <a href="#cartRoutes">Cart Routes</a>
-      </nav>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar">
+          <div class="position-sticky">
+            <h2 class="text-white mb-4">Messhio API Documentation</h2>
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a
+                  class="nav-link active"
+                  id="documentation-tab"
+                  data-bs-toggle="tab"
+                  href="#documentation"
+                  role="tab"
+                  >Documentation</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  id="authRoutes-tab"
+                  data-bs-toggle="tab"
+                  href="#authRoutes"
+                  role="tab"
+                  >User Routes</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  id="supplierRoutes-tab"
+                  data-bs-toggle="tab"
+                  href="#supplierRoutes"
+                  role="tab"
+                  >Supplier Routes</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  id="productRoutes-tab"
+                  data-bs-toggle="tab"
+                  href="#productRoutes"
+                  role="tab"
+                  >Product Routes</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  id="paymentRoutes-tab"
+                  data-bs-toggle="tab"
+                  href="#paymentRoutes"
+                  role="tab"
+                  >Payment Routes</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  id="orderRoutes-tab"
+                  data-bs-toggle="tab"
+                  href="#orderRoutes"
+                  role="tab"
+                  >Order Routes</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  id="categoryRoutes-tab"
+                  data-bs-toggle="tab"
+                  href="#categoryRoutes"
+                  role="tab"
+                  >Category Routes</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  id="cartRoutes-tab"
+                  data-bs-toggle="tab"
+                  href="#cartRoutes"
+                  role="tab"
+                  >Cart Routes</a
+                >
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <div class="tab-content">
+            <div
+              class="tab-pane fade show active"
+              id="documentation"
+              role="tabpanel"
+            >
+              <h3>API Project Description</h3>
+              <p>
+                This API project is designed to manage an e-commerce platform.
+                It includes various routes for handling users, suppliers,
+                products, payments, orders, categories, and cart functionality.
+                The API provides secure authentication, data management, and
+                payment processing to ensure a seamless shopping experience for
+                both users and suppliers.
+              </p>
+              <p>
+                The documentation is divided into sections representing the
+                different routes available within the API, each with its
+                associated HTTP methods and endpoints.
+              </p>
+              <h3>ER Diagram</h3>
+              <img src="../public/ER Diagram.png" alt="ER Diagram" />
+            </div>
+
+            <div class="tab-pane fade" id="authRoutes" role="tabpanel">
+              <h3>User Routes</h3>
+              <p><strong>POST /api/v1/auth/login</strong>: Log in a user.</p>
+              <pre>
+{
+  "email": "user@example.com",
+  "password": "yourpassword"
+}
+                        </pre
+              >
+              <p>
+                <strong>POST /api/v1/auth/register</strong>: Register a new
+                user.
+              </p>
+              <pre>
+{
+  "username": "newuser",
+  "firstname": "First",
+  "lastname": "Last",
+  "email": "user@example.com",
+  "password": "yourpassword"
+}
+                        </pre
+              >
+              <p><strong>POST /api/v1/auth/logout</strong>: Log out a user.</p>
+              <p>
+                <strong>GET /api/v1/auth/send-otp</strong>: Send OTP for
+                verification.
+              </p>
+              <pre>
+{
+  "email": "user@example.com"
+}
+                        </pre
+              >
+              <p>
+                <strong>POST /api/v1/auth/reset-password</strong>: Reset user
+                password.
+              </p>
+              <pre>
+{
+  "email": "user@example.com",
+  "newPassword": "newpassword",
+  "otp": "123456"
+}
+                        </pre
+              >
+              <p><strong>POST /api/v1/auth/otp</strong>: Verify OTP.</p>
+              <pre>
+{
+  "otp": "123456"
+}
+                        </pre
+              >
+              <p>
+                <strong>GET /api/v1/auth/profile</strong>: Show user profile.
+              </p>
+              <p>
+                <strong>GET /api/v1/auth/users</strong>: Get all users (Admin
+                only).
+              </p>
+              <p>
+                <strong>PUT /api/v1/auth/profile</strong>: Update user profile
+                with optional image upload.
+              </p>
+              <pre>
+{
+  "email": "user@example.com",
+  "updatedFields": {
+    "firstname": "NewFirstName",
+    "lastname": "NewLastName"
+  }
+}
+                        </pre
+              >
+            </div>
+
+            <div class="tab-pane fade" id="supplierRoutes" role="tabpanel">
+              <h3>Supplier Routes</h3>
+              <p>
+                <strong>POST /api/v1/suppliers/login</strong>: Log in a
+                supplier.
+              </p>
+              <pre>
+{
+  "email": "supplier@example.com",
+  "password": "yourpassword"
+}
+                        </pre
+              >
+              <p>
+                <strong>POST /api/v1/suppliers/register</strong>: Register a new
+                supplier.
+              </p>
+              <pre>
+{
+  "companyName": "Supplier Company",
+  "contactPerson": {
+    "firstname": "First",
+    "lastname": "Last"
+  },
+  "email": "supplier@example.com",
+  "password": "yourpassword",
+  "vatNumber": "VAT123456"
+}
+                        </pre
+              >
+              <p>
+                <strong>GET /api/v1/suppliers/profile/:id</strong>: Get supplier
+                details by ID.
+              </p>
+              <p>
+                <strong>PUT /api/v1/suppliers/profile/:id</strong>: Update
+                supplier details.
+              </p>
+              <pre>
+{
+  "contactPerson": {
+    "firstname": "UpdatedFirstName",
+    "lastname": "UpdatedLastName"
+  },
+  "email": "updated@example.com"
+}
+                        </pre
+              >
+              <p>
+                <strong>GET /api/v1/suppliers</strong>: Get all suppliers (Admin
+                only).
+              </p>
+            </div>
+
+            <div class="tab-pane fade" id="productRoutes" role="tabpanel">
+              <h3>Product Routes</h3>
+              <p>
+                <strong>GET /api/v1/products</strong>: Get all products with
+                optional query parameters for pagination and filtering.
+              </p>
+              <pre>
+{
+  "category": "Electronics",
+  "priceMin": 100,
+  "priceMax": 1000,
+  "sortBy": "price",
+  "order": "asc"
+}
+                        </pre
+              >
+              <p><strong>POST /api/v1/products</strong>: Add a new product.</p>
+              <pre>
+{
+  "name": "New Product",
+  "description": "Product description here",
+  "price": 299.99,
+  "category": "Electronics",
+  "supplierId": "supplier123"
+}
+                        </pre
+              >
+              <p>
+                <strong>GET /api/v1/products/:id</strong>: Get product details
+                by ID.
+              </p>
+              <p>
+                <strong>PUT /api/v1/products/:id</strong>: Update product
+                details.
+              </p>
+              <pre>
+{
+  "price": 249.99,
+  "description": "Updated description"
+}
+                        </pre
+              >
+              <p>
+                <strong>DELETE /api/v1/products/:id</strong>: Delete a product.
+              </p>
+            </div>
+
+            <div class="tab-pane fade" id="paymentRoutes" role="tabpanel">
+              <h3>Payment Routes</h3>
+              <p>
+                <strong>POST /api/v1/payments/charge</strong>: Process a
+                payment.
+              </p>
+              <pre>
+{
+  "amount": 50.00,
+  "currency": "USD",
+  "paymentMethod": "card",
+  "token": "token123"
+}
+                        </pre
+              >
+              <p>
+                <strong>GET /api/v1/payments/:id</strong>: Get payment details
+                by ID.
+              </p>
+            </div>
+
+            <div class="tab-pane fade" id="orderRoutes" role="tabpanel">
+              <h3>Order Routes</h3>
+              <p><strong>POST /api/v1/orders</strong>: Create a new order.</p>
+              <pre>
+{
+  "productId": "product123",
+  "quantity": 2,
+  "deliveryAddress": "123 Main St"
+}
+                        </pre
+              >
+              <p>
+                <strong>GET /api/v1/orders/:id</strong>: Get order details by
+                ID.
+              </p>
+              <p>
+                <strong>GET /api/v1/orders</strong>: Get all orders with
+                optional query parameters for pagination and filtering.
+              </p>
+              <p>
+                <strong>PUT /api/v1/orders/:id</strong>: Update order details.
+              </p>
+              <pre>
+{
+  "status": "shipped"
+}
+                        </pre
+              >
+              <p>
+                <strong>DELETE /api/v1/orders/:id</strong>: Cancel an order.
+              </p>
+            </div>
+
+            <div class="tab-pane fade" id="categoryRoutes" role="tabpanel">
+              <h3>Category Routes</h3>
+              <p>
+                <strong>GET /api/v1/categories</strong>: Get all categories.
+              </p>
+              <p>
+                <strong>POST /api/v1/categories</strong>: Add a new category.
+              </p>
+              <pre>
+{
+  "name": "New Category",
+  "description": "Category description"
+}
+                        </pre
+              >
+              <p>
+                <strong>GET /api/v1/categories/:id</strong>: Get category
+                details by ID.
+              </p>
+              <p>
+                <strong>PUT /api/v1/categories/:id</strong>: Update category
+                details.
+              </p>
+              <pre>
+{
+  "name": "Updated Category Name"
+}
+                        </pre
+              >
+              <p>
+                <strong>DELETE /api/v1/categories/:id</strong>: Delete a
+                category.
+              </p>
+            </div>
+
+            <div class="tab-pane fade" id="cartRoutes" role="tabpanel">
+              <h3>Cart Routes</h3>
+              <p><strong>GET /api/v1/cart</strong>: Get items in the cart.</p>
+              <p>
+                <strong>POST /api/v1/cart/add</strong>: Add an item to the cart.
+              </p>
+              <pre>
+{
+  "productId": "product123",
+  "quantity": 1
+}
+                        </pre
+              >
+              <p>
+                <strong>PUT /api/v1/cart/update</strong>: Update item quantity
+                in the cart.
+              </p>
+              <pre>
+{
+  "productId": "product123",
+  "quantity": 3
+}
+                        </pre
+              >
+              <p>
+                <strong>DELETE /api/v1/cart/remove</strong>: Remove an item from
+                the cart.
+              </p>
+              <pre>
+{
+  "productId": "product123"
+}
+                        </pre
+              >
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
 
-    <div class="content">
-      <section id="userRoutes" class="route-info">
-        <h3 class="title is-5">User Routes</h3>
-        <p><strong>POST /api/v1/auth/login</strong>: Log in a user.</p>
-        <p><strong>POST /api/v1/auth/register</strong>: Register a new user.</p>
-        <p><strong>POST /api/v1/auth/logout</strong>: Log out a user.</p>
-        <p>
-          <strong>GET /api/v1/auth/send-otp</strong>: Send OTP for verification.
-        </p>
-        <p>
-          <strong>POST /api/v1/auth/reset-password</strong>: Reset user
-          password.
-        </p>
-        <p><strong>POST /api/v1/auth/otp</strong>: Verify OTP.</p>
-        <p><strong>GET /api/v1/auth/profile</strong>: Show user profile.</p>
-        <p><strong>GET /api/v1/auth/</strong>: Get all users (Admin only).</p>
-        <p>
-          <strong>PUT /api/v1/auth/profile</strong>: Update user profile with
-          optional image upload.
-        </p>
-      </section>
-
-      <section id="supplierRoutes" class="route-info">
-        <h3 class="title is-5">Supplier Routes</h3>
-        <p><strong>POST /login</strong>: Log in a supplier.</p>
-        <p><strong>POST /register</strong>: Register a new supplier.</p>
-        <p><strong>GET /profile/:id</strong>: Get supplier details by ID.</p>
-        <p><strong>PUT /profile/:id</strong>: Update supplier details by ID.</p>
-        <p><strong>DELETE /profile/:id</strong>: Delete supplier by ID.</p>
-        <p><strong>GET /all</strong>: Get all suppliers (Admin only).</p>
-      </section>
-
-      <section id="productRoutes" class="route-info">
-        <h3 class="title is-5">Product Routes</h3>
-        <p><strong>GET /</strong>: Get all products.</p>
-        <p><strong>POST /</strong>: Create a new product.</p>
-        <p><strong>PUT /:id</strong>: Update a product by ID.</p>
-        <p><strong>DELETE /:id</strong>: Delete a product by ID.</p>
-        <p><strong>GET /filter</strong>: Filter products by category.</p>
-        <p><strong>GET /:id</strong>: Get a product by ID.</p>
-      </section>
-
-      <section id="paymentRoutes" class="route-info">
-        <h3 class="title is-5">Payment Routes</h3>
-        <p><strong>POST /payment</strong>: Process a payment.</p>
-        <p>
-          <strong>GET /payment/status/:transactionId</strong>: Get payment
-          status by transaction ID.
-        </p>
-        <p>
-          <strong>GET /payment/history/:userId</strong>: Get payment history for
-          a user by ID.
-        </p>
-        <p>
-          <strong>POST /payment/refund/:transactionId</strong>: Initiate a
-          refund by transaction ID.
-        </p>
-        <p>
-          <strong>GET /payment/methods</strong>: Get available payment methods.
-        </p>
-      </section>
-
-      <section id="orderRoutes" class="route-info">
-        <h3 class="title is-5">Order Routes</h3>
-        <p><strong>POST /</strong>: Create a new order.</p>
-        <p><strong>GET /</strong>: Get all orders.</p>
-        <p><strong>GET /:id</strong>: Get order details by ID.</p>
-        <p><strong>PUT /:id</strong>: Update an order by ID.</p>
-        <p><strong>DELETE /:id</strong>: Delete an order by ID.</p>
-      </section>
-
-      <section id="categoryRoutes" class="route-info">
-        <h3 class="title is-5">Category Routes</h3>
-        <p><strong>GET /</strong>: Get all categories.</p>
-        <p><strong>GET /:id</strong>: Get a category by ID.</p>
-        <p><strong>POST /</strong>: Create a new category.</p>
-        <p><strong>PUT /:id</strong>: Update a category by ID.</p>
-        <p><strong>DELETE /:id</strong>: Delete a category by ID.</p>
-      </section>
-
-      <section id="cartRoutes" class="route-info">
-        <h3 class="title is-5">Cart Routes</h3>
-        <p><strong>GET /</strong>: Fetch all items in the cart.</p>
-        <p><strong>POST /</strong>: Add a new item to the cart.</p>
-        <p>
-          <strong>PUT /:itemId</strong>: Update a specific item in the cart.
-        </p>
-        <p>
-          <strong>DELETE /:itemId</strong>: Remove a specific item from the
-          cart.
-        </p>
-      </section>
-    </div>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

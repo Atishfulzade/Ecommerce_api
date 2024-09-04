@@ -58,7 +58,10 @@ const userSchema = new mongoose.Schema(
     verificationToken: {
       type: String,
     },
-    cart: [cartSchema],
+    cart: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Cart",
+    },
     cards: [
       {
         type: mongoose.Schema.Types.ObjectId,

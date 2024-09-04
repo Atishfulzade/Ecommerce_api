@@ -1,5 +1,4 @@
 import { Order } from "../models/orderSchema.models.js";
-
 // Create a new order
 export const createOrder = async (req, res) => {
   try {
@@ -12,12 +11,10 @@ export const createOrder = async (req, res) => {
       products.length === 0 ||
       typeof totalAmount !== "number"
     ) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "User ID, products array, and totalAmount (number) are required",
-        });
+      return res.status(400).json({
+        message:
+          "User ID, products array, and totalAmount (number) are required",
+      });
     }
 
     const newOrder = new Order({
@@ -48,8 +45,8 @@ export const getAllOrders = async (req, res) => {
     const orders = await Order.find({})
       .skip(skip)
       .limit(parseInt(limit))
-      .populate("userId")
-      .populate("products.productId");
+      .populate("userId", "username email") // Limiting populated fields
+      .populate("products.productId", "name price"); // Limiting populated fields
 
     res.status(200).json(orders);
   } catch (error) {
@@ -66,8 +63,8 @@ export const getOrderById = async (req, res) => {
 
   try {
     const order = await Order.findById(id)
-      .populate("userId")
-      .populate("products.productId");
+      .populate("userId", "username email")
+      .populate("products.productId", "name price");
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }

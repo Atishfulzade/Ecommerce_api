@@ -1,21 +1,12 @@
 import mongoose from "mongoose";
 import { addressSchema } from "./addressSchema.models.js";
-import { cartSchema } from "./cartSchema.models.js";
 
 const userSchema = new mongoose.Schema(
   {
     profileImage: {
       type: String,
-      default: "default-profile.png",
     },
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      match: /^[a-zA-Z0-9]+$/i,
-      minlength: 6,
-      maxlength: 20,
-    },
+
     firstname: {
       type: String,
       required: true,
@@ -40,7 +31,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    address: [addressSchema],
+    address: addressSchema,
     role: {
       type: String,
       enum: ["admin", "supplier", "user"], // Defined roles
@@ -64,8 +55,15 @@ const userSchema = new mongoose.Schema(
     },
     cards: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Card",
+        cardNumber: String,
+        cardholderName: String,
+        expiryDate: String,
+        cvv: String,
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        }, // Make sure this is required in the correct place
       },
     ],
   },

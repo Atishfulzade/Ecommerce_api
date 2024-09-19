@@ -16,16 +16,20 @@ import supplierAuth from "./routes/supplierAuth.js";
 import paymentRoute from "./routes/paymentRoute.js";
 import orderRoute from "./routes/orderRoute.js";
 import cartRoute from "./routes/cartRoute.js";
-
 // Import DB connection
 import { connect } from "./db/conn.js";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
-
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  })
+);
 app.use(cookieParser());
 app.use(express.json({ limit: "20kb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -54,7 +58,7 @@ app.use(
       ttl: 14 * 24 * 60 * 60, // 14 days expiration
     }),
     cookie: {
-      secure: true, // set to true if using HTTPS
+      secure: false, // set to true if using HTTPS
       maxAge: 60000, // 1 minute for example
     },
   })

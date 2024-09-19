@@ -14,11 +14,36 @@ export const getAllProducts = async (req, res) => {
       .json({ message: "Failed to fetch products", error: error.message });
   }
 };
+export const searchProduct = async (req, res) => {
+  const { search } = req.body;
+  console.log(req);
+
+  try {
+    // Validate the search input
+    if (!search) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    // Search for products with a case-insensitive regex
+    const products = await Product.find({
+      name: { $regex: search, $options: "i" }, // Case-insensitive search
+    });
+
+    // Send the list of products as a JSON response
+    res.json(products);
+  } catch (error) {
+    console.error("Error fetching products:", error); // Log the error for debugging
+    res.status(500).json({ message: "Error fetching products" });
+  }
+};
 
 // Create a new product
 export const createProduct = async (req, res) => {
+  const product_images = req.uploadedFilesUrls;
+  console.log(product_images);
+
   try {
-    const { name, description, product_images } = req.body;
+    const { name, description } = req.body;
 
     // Check for required fields
     if (!name || !description || !product_images || !product_images.length) {
@@ -29,13 +54,12 @@ export const createProduct = async (req, res) => {
     }
 
     // Get the file locations from the previous middleware
-    const productImages = req.body.fileLocations || [];
 
     // Create a new product object
     const newProduct = new Product({
       name,
       description,
-      product_images: productImages, // Store the array of signed URLs of uploaded images
+      product_images: product_images, // Store the array of signed URLs of uploaded images
       ...req.body, // Include any additional fields
     });
 

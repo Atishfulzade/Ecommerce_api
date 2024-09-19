@@ -5,6 +5,7 @@ import {
   filterProduct,
   findById,
   getAllProducts,
+  searchProduct,
   updateProduct,
 } from "../controllers/product.controller.js";
 import { verifySupplier } from "../controllers/supplier.controller.js";
@@ -13,18 +14,15 @@ const router = express.Router();
 
 // Get all products
 router.get("/", getAllProducts);
+router.post("/search", searchProduct);
 
 // Create a new product
 router.post(
   "/",
   verifySupplier,
-  (req, res, next) => {
-    if (req.files) {
-      uploadImagesToS3(req, res, next);
-    } else {
-      next();
-    }
-  },
+
+  uploadImagesToS3,
+
   createProduct
 );
 

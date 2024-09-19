@@ -1,55 +1,47 @@
 import express from "express";
 import {
-  allUsers,
   loginUser,
-  logOutUser,
-  otpVerify,
   registerUser,
+  logOutUser,
   resetPassword,
   sendOtp,
+  verifyOtp,
   showProfile,
   updateProfile,
+  addOrUpdateAddress, // Using this combined controller for add/update address
+  addCard,
   verifyUser,
+  allUsers,
+  deleteCard, // Ensure this controller is properly defined in the controller file
 } from "../controllers/user.controller.js";
 import { uploadImageToS3 } from "../utils/s3_configuration.js";
 import { authorizeRoles } from "../utils/AuthoriseRole.js";
 
 const router = express.Router();
 
-// POST /api/v1/auth/login
-router.post("/login", loginUser);
+// ========================== Auth Routes ==========================
+router.post("/auth/login", loginUser);
+router.post("/auth/register", registerUser);
+router.post("/auth/logout", logOutUser);
+router.post("/auth/reset-password", resetPassword);
+router.post("/auth/otp", verifyOtp);
+router.get("/auth/send-otp", verifyUser, sendOtp);
 
-// POST /api/v1/auth/register
-router.post("/register", registerUser);
-
-// POST /api/v1/auth/logout
-router.post("/logout", logOutUser);
-
-// GET /api/v1/auth/send-otp
-router.get("/send-otp", verifyUser, sendOtp);
-
-// POST /api/v1/auth/reset-password
-router.post("/reset-password", resetPassword);
-
-// POST /api/v1/auth/otp
-router.post("/otp", otpVerify);
-
-// GET /api/v1/auth/profile
+// ======================== Profile Routes =========================
 router.get("/profile", verifyUser, showProfile);
-
-router.get("/", authorizeRoles("admin"), allUsers);
-// PUT /api/v1/auth/profile
 router.put(
   "/profile",
-  verifyUser,
-  (req, res, next) => {
-    if (req.file) {
-      uploadImageToS3(req, res, next);
-    } else {
-      next();
-    }
-  },
-  updateProfile
+  verifyUser, // Verify user is authenticated
+  uploadImageToS3, // Middleware to upload image to S3
+  updateProfile // Controller to update profile info
 );
+
+// ====================== Address and Card Routes ==================
+router.put("/address", verifyUser, addOrUpdateAddress); // Single route for add/update
+router.post("/card", verifyUser, addCard); // POST for adding new card
+router.delete("/card", verifyUser, deleteCard); // delete card
+
+// ========================= Admin Routes ==========================
+router.get("/", authorizeRoles("admin"), allUsers); // Route to retrieve all users for admin
 
 export default router;

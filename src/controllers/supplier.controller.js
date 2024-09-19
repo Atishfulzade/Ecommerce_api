@@ -84,7 +84,7 @@ export const loginSupplier = async (req, res) => {
 
     const token = generateToken(supplier);
 
-    res.json({ message: "Logged in successfully", token });
+    res.json({ message: "Logged in successfully", token, supplier });
   } catch (error) {
     res
       .status(500)
@@ -230,12 +230,10 @@ export const showProfile = async (req, res) => {
 
     res.status(200).json({ supplier });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to retrieve supplier profile",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to retrieve supplier profile",
+      error: error.message,
+    });
   }
 };
 

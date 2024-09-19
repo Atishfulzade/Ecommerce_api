@@ -21,15 +21,23 @@ const s3Client = new S3Client({
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Function to handle image upload, conversion to WebP, and upload to S3
+// Middleware to handle image upload, conversion to WebP, and upload to S3
 export const uploadImageToS3 = async (req, res, next) => {
-  upload.single("image")(req, res, async (err) => {
+  console.log("Upload Image Middleware Started");
+
+  // Use multer to process the file upload
+  upload.single("profileImage")(req, res, async (err) => {
+    console.log("Multer Error:", err);
+    console.log("Request Body:", req.body);
+    console.log("Request File:", req.file);
     if (err) {
       console.error("Upload error:", err);
       return res
         .status(500)
         .json({ error: "Image upload failed", details: err.message });
     }
+
+    console.log("Multer processed file:", req.file);
 
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -70,25 +78,27 @@ export const uploadImageToS3 = async (req, res, next) => {
       next();
     } catch (conversionError) {
       console.error("Image conversion/upload error:", conversionError);
-      res
-        .status(500)
-        .json({
-          error: "Image processing or upload failed",
-          details: conversionError.message,
-        });
+      res.status(500).json({
+        error: "Image processing or upload failed",
+        details: conversionError.message,
+      });
     }
   });
 };
 
-// Function to handle multiple image uploads, conversion to WebP, and upload to S3
+// Middleware to handle multiple image uploads, conversion to WebP, and upload to S3
 export const uploadImagesToS3 = async (req, res, next) => {
-  upload.array("images", 10)(req, res, async (err) => {
+  console.log("Upload Images Middleware Started");
+
+  upload.array("product_images", 8)(req, res, async (err) => {
     if (err) {
       console.error("Upload error:", err);
       return res
         .status(500)
         .json({ error: "Images upload failed", details: err.message });
     }
+
+    console.log("Multer processed files:", req.files);
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
@@ -135,12 +145,10 @@ export const uploadImagesToS3 = async (req, res, next) => {
       next();
     } catch (conversionError) {
       console.error("Image conversion/upload error:", conversionError);
-      res
-        .status(500)
-        .json({
-          error: "Image processing or upload failed",
-          details: conversionError.message,
-        });
+      res.status(500).json({
+        error: "Image processing or upload failed",
+        details: conversionError.message,
+      });
     }
   });
 };

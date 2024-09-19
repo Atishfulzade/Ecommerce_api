@@ -4,13 +4,11 @@ import { reviewSchema } from "./reviewSchema.models.js";
 const ProductSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    category_id: { type: Number },
     category_name: { type: mongoose.Schema.Types.String, ref: "Category" }, // Reference to Category model
     min_catalog_price: { type: Number },
     min_product_price: { type: Number },
     description: { type: String, required: true },
     full_details: { type: String },
-    share_text: { type: String },
     type: { type: String },
     suppliers: { type: mongoose.Schema.Types.ObjectId, ref: "Supplier" }, // Reference to User model
 
@@ -33,12 +31,7 @@ const ProductSchema = new mongoose.Schema(
       show_shipping_charges: { type: Boolean },
       show_free_delivery: { type: Boolean },
     },
-    product_images: [
-      {
-        id: { type: Number },
-        url: { type: String },
-      },
-    ],
+    product_images: [String],
     activated: { type: Date },
     num_shares: { type: String },
 

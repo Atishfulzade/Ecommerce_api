@@ -40,13 +40,12 @@ export const searchProduct = async (req, res) => {
 // Create a new product
 export const createProduct = async (req, res) => {
   const product_images = req.uploadedFilesUrls;
-  console.log(product_images);
 
   try {
     const { name, description } = req.body;
 
     // Check for required fields
-    if (!name || !description || !product_images || !product_images.length) {
+    if (!name || !description || !product_images) {
       return res.status(400).json({
         message:
           "Name, description, and at least one product image are required fields.",

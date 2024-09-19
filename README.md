@@ -73,14 +73,21 @@ EMAIL_PASS=your_email_password
 ## The API has several endpoints across different routes. Below is a brief overview:
 
 ### User Routes
-POST /api/v1/auth/login - Login user
-POST /api/v1/auth/register - Register new user
-POST /api/v1/auth/logout - Logout user
-GET /api/v1/auth/profile - Get user profile
-PUT /api/v1/auth/profile - Update user profile
+POST /api/v1/auth/login 
+- Login user
+POST /api/v1/auth/register
+- Register new user
+POST /api/v1/auth/logout
+- Logout user
+GET /api/v1/auth/profile
+- Get user profile
+PUT /api/v1/auth/profile
+- Update user profile
 ### Supplier Routes
-POST /api/v1/supplier/login - Login supplier
-POST /api/v1/supplier/register - Register new supplier
+POST /api/v1/supplier/login 
+- Login supplier
+POST /api/v1/supplier/register
+- Register new supplier
 GET /api/v1/supplier/profile/
 - Get supplier profile
 PUT /api/v1/supplier/profile/
@@ -88,8 +95,10 @@ PUT /api/v1/supplier/profile/
 DELETE /api/v1/supplier/profile/
 - Delete supplier profile
 ### Product Routes
-GET /api/v1/products - Get all products
-POST /api/v1/products - Create a new product
+GET /api/v1/products 
+- Get all products
+POST /api/v1/products
+- Create a new product
 GET /api/v1/products/
 - Get a product by ID
 PUT /api/v1/products/
@@ -97,15 +106,19 @@ PUT /api/v1/products/
 DELETE /api/v1/products/
 - Delete a product
 ### Cart Routes
-GET /api/v1/cart - Fetch all items in the cart
-POST /api/v1/cart - Add a new item to the cart
+GET /api/v1/cart 
+- Fetch all items in the cart
+POST /api/v1/cart
+- Add a new item to the cart
 PUT /api/v1/cart/
 - Update a specific item in the cart
 DELETE /api/v1/cart/
 - Remove a specific item from the cart
 ### Order Routes
-POST /api/v1/orders - Create a new order
-GET /api/v1/orders - Get all orders
+POST /api/v1/orders 
+- Create a new order
+GET /api/v1/orders
+- Get all orders
 GET /api/v1/orders/
 - Get an order by ID
 PUT /api/v1/orders/
@@ -113,14 +126,16 @@ PUT /api/v1/orders/
 DELETE /api/v1/orders/
 - Delete an order
 ### Payment Routes
-POST /api/v1/payment/payment - Process a payment
+POST /api/v1/payment/payment 
+- Process a payment
 GET /api/v1/payment/status/
 - Get payment status
 GET /api/v1/payment/history/
 - Get payment history
 POST /api/v1/payment/refund/
 - Initiate a refund
-GET /api/v1/payment/methods - Get available payment methods
+GET /api/v1/payment/methods
+- Get available payment methods
 
 ## Deployment
 [Deplyed link](https://meeshio.onrender.com/)

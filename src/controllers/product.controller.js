@@ -1,5 +1,5 @@
 import { Product } from "../models/productSchema.models.js";
-
+import mongoose from "mongoose";
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
@@ -14,6 +14,29 @@ export const getAllProducts = async (req, res) => {
       .json({ message: "Failed to fetch products", error: error.message });
   }
 };
+
+export const getProductsBySupplierId = async (req, res) => {
+  const { supplierId } = req.query; // Assuming supplierId is sent as a query parameter
+
+  if (!supplierId || !mongoose.Types.ObjectId.isValid(supplierId)) {
+    return res.status(400).json({ message: "Invalid supplier ID" });
+  }
+
+  try {
+    const products = await Product.find({ supplier: supplierId }); // Assuming 'supplier' is the field in Product model
+    if (!products || products.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No products found for this supplier" });
+    }
+
+    res.status(200).json({ products });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 export const searchProduct = async (req, res) => {
   const { search } = req.body;
   console.log(req);
@@ -39,10 +62,11 @@ export const searchProduct = async (req, res) => {
 
 // Create a new product
 export const createProduct = async (req, res) => {
-  const product_images = req.uploadedFilesUrls;
+  const product_images = req.uploadedFilesKeys;
 
   try {
     const { name, description } = req.body;
+    console.log(req.body);
 
     // Check for required fields
     if (!name || !description || !product_images) {

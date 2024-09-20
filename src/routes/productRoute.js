@@ -5,6 +5,7 @@ import {
   filterProduct,
   findById,
   getAllProducts,
+  getProductsBySupplierId,
   searchProduct,
   updateProduct,
 } from "../controllers/product.controller.js";
@@ -25,6 +26,8 @@ router.post(
 
   createProduct
 );
+// router.get("/product/:supplierId", verifySupplier, getProductsBySupplierId);
+router.get("/product", verifySupplier, getProductsBySupplierId);
 
 // Filter products by category
 router.put("/:id", verifySupplier, updateProduct);

@@ -10,7 +10,7 @@ const ProductSchema = new mongoose.Schema(
     description: { type: String, required: true },
     full_details: { type: String },
     type: { type: String },
-    suppliers: { type: mongoose.Schema.Types.ObjectId, ref: "Supplier" }, // Reference to User model
+    supplier: { type: mongoose.Schema.Types.ObjectId, ref: "Supplier" }, // Reference to User model
 
     trend: { type: String },
     popular: { type: Boolean },

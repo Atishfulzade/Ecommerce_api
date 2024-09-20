@@ -194,28 +194,34 @@ export const updateProfile = async (req, res) => {
   try {
     const { email, updatedFields } = req.body;
 
+    // Fetch the supplier by email
     const supplier = await Supplier.findOne({ email });
     if (!supplier)
       return res.status(404).json({ message: "Supplier not found" });
 
+    // If S3 image upload was successful, attach the new image URL
     if (req.fileLocation) {
-      updatedFields.profileImage = req.fileLocation; // Update S3 file location if provided
+      updatedFields.profileImage = req.fileLocation; // Use the S3 URL or path
     }
 
+    // Update the supplier document with the new fields
     const updatedSupplier = await Supplier.findByIdAndUpdate(
       supplier._id,
       { $set: updatedFields },
-      { new: true, runValidators: true } // Ensure schema validation
+      { new: true, runValidators: true } // Ensures validation is run
     );
 
+    // Respond with the updated supplier information
     res.status(200).json({
       message: "Profile updated successfully",
       supplier: updatedSupplier,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Unable to update profile", error: error.message });
+    // Handle errors, such as DB connection or validation issues
+    res.status(500).json({
+      message: "Unable to update profile",
+      error: error.message,
+    });
   }
 };
 

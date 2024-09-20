@@ -7,6 +7,7 @@ import {
   updateProfile,
   deleteSupplier,
   getAllSuppliers,
+  logOutSupplier,
 } from "../controllers/supplier.controller.js";
 import { uploadImageToS3 } from "../utils/s3_configuration.js";
 import { authorizeRoles } from "../utils/AuthoriseRole.js";
@@ -20,12 +21,7 @@ router.post("/login", loginSupplier);
 router.post("/register", registerSupplier);
 
 // Get supplier details by ID
-router.get(
-  "/profile/:id",
-  verifySupplier,
-  authorizeRoles("user", "admin", "supplier"),
-  showProfile
-);
+router.get("/profile/:id", showProfile);
 
 // Update supplier details by ID
 router.put(
@@ -43,6 +39,7 @@ router.delete(
   authorizeRoles("admin"),
   deleteSupplier
 );
+router.post("/logout", verifySupplier, logOutSupplier);
 
 // Get all suppliers route
 router.get("/all", verifySupplier, authorizeRoles("admin"), getAllSuppliers);

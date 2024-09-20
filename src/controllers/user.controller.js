@@ -337,7 +337,7 @@ export const showProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { id: userId } = req.user;
-    const profileImage = req.uploadedFileUrl;
+    const profileImage = req.uploadedFileKey;
     console.log(profileImage);
 
     if (!profileImage) {

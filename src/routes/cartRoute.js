@@ -13,7 +13,7 @@ const router = express.Router();
 router.get("/", verifyUser, getCart);
 
 // POST - Add a new item to the cart
-router.post("/", verifyUser, addToCart);
+router.post("/:itemId", verifyUser, addToCart);
 
 // PUT - Update a specific item in the cart
 router.put("/:itemId", verifyUser, editCartItem);

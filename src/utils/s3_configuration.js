@@ -24,6 +24,7 @@ const upload = multer({ storage });
 // Middleware to handle single image upload (profile image), conversion, and upload to S3
 export const uploadImageToS3 = async (req, res, next) => {
   console.log("Upload Image Middleware Started");
+  console.log(req.file);
 
   upload.single("profileImage")(req, res, async (err) => {
     if (err) {

@@ -5,6 +5,7 @@ const supplierSchema = new mongoose.Schema(
   {
     profileImage: {
       type: String,
+      default: "uploads/user.png",
     },
     companyName: {
       type: String,
@@ -16,7 +17,7 @@ const supplierSchema = new mongoose.Schema(
       type: String,
       required: true,
       match: /^\+\d{1,15}$/i,
-      maxlength: 10,
+      maxlength: 15,
     },
     email: {
       type: String,

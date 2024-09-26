@@ -8,6 +8,7 @@ import {
 } from "../controllers/category.controller.js";
 import { authorizeRoles } from "../utils/AuthoriseRole.js";
 import { verifySupplier } from "../controllers/supplier.controller.js";
+import { uploadImageToS3 } from "../utils/s3_configuration.js";
 
 const router = express.Router();
 
@@ -18,7 +19,13 @@ router.get("/", getAllCategories);
 router.get("/:id", getCategoryById);
 
 // Route to create a new category
-router.post("/", verifySupplier, authorizeRoles("admin"), createCategory);
+router.post(
+  "/",
+  verifySupplier,
+  authorizeRoles("admin"),
+  uploadImageToS3,
+  createCategory
+);
 
 // Route to update a category
 router.put("/:id", verifySupplier, authorizeRoles("admin"), updateCategory);

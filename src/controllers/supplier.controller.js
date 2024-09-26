@@ -23,7 +23,8 @@ const generateToken = (supplier, expiresIn = "1h") => {
 // Register new Supplier
 export const registerSupplier = async (req, res) => {
   try {
-    const { companyName, contactPerson, email, password, vatNumber } = req.body;
+    const { companyName, contactPerson, email, mobile, password, vatNumber } =
+      req.body;
     const { firstname, lastname } = contactPerson;
 
     if (!vatNumber) {
@@ -51,6 +52,7 @@ export const registerSupplier = async (req, res) => {
       email,
       password: hashedPassword,
       vatNumber,
+      mobile,
     });
 
     await supplier.save();
@@ -60,6 +62,7 @@ export const registerSupplier = async (req, res) => {
     res.status(201).json({
       message: "Supplier registered successfully",
       token,
+      supplier,
     });
   } catch (error) {
     console.error("Error during supplier registration:", error);

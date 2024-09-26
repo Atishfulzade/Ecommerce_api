@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema(
   {
     profileImage: {
       type: String,
+      default: "uploads/user.png",
     },
 
     firstname: {

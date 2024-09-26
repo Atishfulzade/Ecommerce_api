@@ -4,7 +4,6 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { generateOTP } from "../utils/generateOTP.js";
 import { sendOtpEmail } from "../utils/sendMail.js";
-import _ from "lodash";
 import mongoose from "mongoose";
 
 dotenv.config();
@@ -26,25 +25,19 @@ export const resetPassword = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if the OTP matches
     if (user.otp !== otp || user.otpExpiry < Date.now()) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
-    // Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update user's password and clear OTP
     user.password = hashedPassword;
     user.otp = null;
     user.otpExpiry = null;
-
     await user.save();
 
     res.status(200).json({ message: "Password reset successfully" });
@@ -62,22 +55,18 @@ export const sendOtp = async (req, res) => {
       return res.status(400).json({ message: "Email is required" });
     }
 
-    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Generate OTP
-    const otp = generateOTP(); // Function to generate OTP
-    const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+    const otp = generateOTP();
+    const otpExpiry = Date.now() + 10 * 60 * 1000;
 
-    // Save OTP and its expiry time in the user record
     user.otp = otp;
     user.otpExpiry = otpExpiry;
     await user.save();
 
-    // Send OTP to user's email
     await sendOtpEmail(user.email, `Your OTP for password reset is: ${otp}`);
 
     res.status(200).json({ message: "OTP sent to email successfully" });
@@ -95,13 +84,11 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "Email and OTP are required" });
     }
 
-    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if OTP matches and is not expired
     if (user.otp !== otp) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
@@ -110,12 +97,10 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "OTP has expired" });
     }
 
-    // OTP is valid, so clear it and allow further action
     user.otp = undefined;
     user.otpExpiry = undefined;
     await user.save();
 
-    // Generate JWT token for the user (if applicable)
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
@@ -124,7 +109,7 @@ export const verifyOtp = async (req, res) => {
 
     res.status(200).json({
       message: "OTP verified successfully",
-      token, // Optional: Send token if it's part of the flow
+      token,
     });
   } catch (error) {
     handleError(res, "Failed to verify OTP", error);
@@ -146,7 +131,6 @@ export const registerUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = new User({
       firstname,
       lastname,
@@ -160,8 +144,8 @@ export const registerUser = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
     await sendOtpEmail(
       user.email,
       `Please verify your email by clicking on this link: ${verificationLink}`
@@ -179,6 +163,11 @@ export const registerUser = async (req, res) => {
 
 // ========================== Authentication Middleware ==========================
 export const verifyUser = (req, res, next) => {
+  if (req.session.userId) {
+    req.user = { id: req.session.userId };
+    return next();
+  }
+
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ message: "No token provided" });
 
@@ -198,24 +187,20 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if user exists and include the password for comparison
     const user = await User.findOne({ email }).select(
-      " -updatedAt -cards -address"
+      "-updatedAt -cards -address"
     );
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Exclude password from user object before sending the response
-    const { password: _, ...userWithoutPassword } = user.toObject();
+    req.session.userId = user._id; // Create session
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
@@ -225,7 +210,13 @@ export const loginUser = async (req, res) => {
     res.json({
       message: "Logged in successfully",
       token,
-      user: userWithoutPassword,
+      user: user.toObject({
+        versionKey: false,
+        transform: (_, ret) => {
+          delete ret.password;
+          return ret;
+        },
+      }),
     });
   } catch (error) {
     handleError(res, "Failed to login user", error);
@@ -237,17 +228,56 @@ export const logOutUser = (req, res) => {
   req.session.destroy((err) => {
     if (err)
       return res.status(500).json({ message: "Failed to log out", error: err });
+
     res.clearCookie("connect.sid");
     res.status(200).json({ message: "Logged out successfully" });
   });
 };
 
-// =========================== Address Controllers ===========================
+// ============================ Show Profile ============================
+export const showProfile = async (req, res) => {
+  try {
+    const { id: userId } = req.user;
+
+    const user = await User.findById(userId).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.status(200).json(user);
+  } catch (error) {
+    handleError(res, "Failed to fetch user profile", error);
+  }
+};
+
+// ============================ Update Profile ============================
+export const updateProfile = async (req, res) => {
+  try {
+    const { id: userId } = req.user;
+    const profileImage = req.uploadedFileKey;
+
+    if (!profileImage) {
+      return res
+        .status(400)
+        .json({ message: "At least one field is required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (profileImage) user.profileImage = profileImage;
+
+    await user.save();
+
+    res.status(200).json({ message: "Profile updated successfully", user });
+  } catch (error) {
+    handleError(res, "Failed to update profile", error);
+  }
+};
+
+// ============================ Address Controllers ============================
 export const addOrUpdateAddress = async (req, res) => {
   try {
     const { id: userId } = req.user;
     const { address } = req.body;
-    console.log("Address");
 
     if (!address)
       return res.status(400).json({ message: "Address is required" });
@@ -255,8 +285,7 @@ export const addOrUpdateAddress = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Update or add address
-    user.address = address;
+    user.address = address; // Update or add address
     await user.save();
 
     res.status(200).json({ message: "Address updated successfully", user });
@@ -265,6 +294,27 @@ export const addOrUpdateAddress = async (req, res) => {
   }
 };
 
+export const fetchAddress = async (req, res) => {
+  try {
+    const { id: userId } = req.user;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.status(200).json({ address: user.address });
+  } catch (error) {
+    handleError(res, "Failed to fetch address", error);
+  }
+};
+// ============================ Retrieve All Users (Admin Only) ============================
+export const allUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (error) {
+    handleError(res, "Failed to fetch users", error);
+  }
+};
 // ============================ Card Controllers ============================
 export const addCard = async (req, res) => {
   try {
@@ -316,55 +366,5 @@ export const deleteCard = async (req, res) => {
     res.status(200).json({ message: "Card removed successfully" });
   } catch (error) {
     handleError(res, "Failed to delete card", error);
-  }
-};
-
-// ============================ Show Profile ============================
-export const showProfile = async (req, res) => {
-  try {
-    const { id: userId } = req.user;
-
-    const user = await User.findById(userId).select("-password"); // Exclude password
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    res.status(200).json(user);
-  } catch (error) {
-    handleError(res, "Failed to fetch user profile", error);
-  }
-};
-
-// ============================ Update Profile ============================
-export const updateProfile = async (req, res) => {
-  try {
-    const { id: userId } = req.user;
-    const profileImage = req.uploadedFileKey;
-    console.log(profileImage);
-
-    if (!profileImage) {
-      return res
-        .status(400)
-        .json({ message: "At least one field is required" });
-    }
-
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    if (profileImage) user.profileImage = profileImage;
-
-    await user.save();
-
-    res.status(200).json({ message: "Profile updated successfully", user });
-  } catch (error) {
-    handleError(res, "Failed to update profile", error);
-  }
-};
-
-// ============================ Retrieve All Users (Admin Only) ============================
-export const allUsers = async (req, res) => {
-  try {
-    const users = await User.find();
-    res.status(200).json(users);
-  } catch (error) {
-    handleError(res, "Failed to fetch users", error);
   }
 };

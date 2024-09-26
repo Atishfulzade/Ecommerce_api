@@ -39,6 +39,7 @@ export const getCategoryById = async (req, res) => {
 // Create a new category
 export const createCategory = async (req, res) => {
   const { name } = req.body;
+  const imageURL = req.uploadedFileKey;
 
   // Validate input
   if (!name || typeof name !== "string") {
@@ -48,14 +49,12 @@ export const createCategory = async (req, res) => {
   }
 
   try {
-    const newCategory = new Category({ name });
+    const newCategory = new Category({ name, imageURL });
     await newCategory.save();
-    res
-      .status(201)
-      .json({
-        message: "Category created successfully",
-        category: newCategory,
-      });
+    res.status(201).json({
+      message: "Category created successfully",
+      category: newCategory,
+    });
   } catch (error) {
     console.error("Failed to create category:", error);
     res
@@ -90,12 +89,10 @@ export const updateCategory = async (req, res) => {
     if (!updatedCategory) {
       return res.status(404).json({ message: "Category not found" });
     }
-    res
-      .status(200)
-      .json({
-        message: "Category updated successfully",
-        category: updatedCategory,
-      });
+    res.status(200).json({
+      message: "Category updated successfully",
+      category: updatedCategory,
+    });
   } catch (error) {
     console.error("Failed to update category:", error);
     res

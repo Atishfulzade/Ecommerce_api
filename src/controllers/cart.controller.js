@@ -7,13 +7,13 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 // Get cart for a user
 export const getCart = async (req, res) => {
   try {
-    const { userId } = req.query; // Use query params for userId
+    const { id } = req.user; // Use query params for userId
 
-    if (!userId || !isValidObjectId(userId)) {
+    if (!id || !isValidObjectId(id)) {
       return res.status(400).json({ message: "Invalid or missing User ID" });
     }
 
-    const cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ id });
 
     if (!cart || cart.products.length === 0) {
       return res.status(404).json({ message: "Cart is empty" });
@@ -40,12 +40,10 @@ export const addToCart = async (req, res) => {
       !isValidObjectId(userId) ||
       !isValidObjectId(productId)
     ) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "User ID, product ID, and quantity are required and must be valid",
-        });
+      return res.status(400).json({
+        message:
+          "User ID, product ID, and quantity are required and must be valid",
+      });
     }
 
     let userCart = await Cart.findOne({ userId });
@@ -89,11 +87,9 @@ export const editCartItem = async (req, res) => {
       !isValidObjectId(userId) ||
       !isValidObjectId(productId)
     ) {
-      return res
-        .status(400)
-        .json({
-          message: "User ID, product ID, and valid quantity are required",
-        });
+      return res.status(400).json({
+        message: "User ID, product ID, and valid quantity are required",
+      });
     }
 
     let userCart = await Cart.findOne({ userId });
@@ -135,11 +131,9 @@ export const deleteCart = async (req, res) => {
       !isValidObjectId(userId) ||
       !isValidObjectId(productId)
     ) {
-      return res
-        .status(400)
-        .json({
-          message: "User ID and product ID are required and must be valid",
-        });
+      return res.status(400).json({
+        message: "User ID and product ID are required and must be valid",
+      });
     }
 
     let userCart = await Cart.findOne({ userId });
@@ -156,22 +150,18 @@ export const deleteCart = async (req, res) => {
       userCart.products.splice(productIndex, 1);
 
       await userCart.save();
-      res
-        .status(200)
-        .json({
-          message: "Product removed from cart successfully",
-          cart: userCart,
-        });
+      res.status(200).json({
+        message: "Product removed from cart successfully",
+        cart: userCart,
+      });
     } else {
       res.status(404).json({ message: "Product not found in the cart" });
     }
   } catch (error) {
     console.error("Failed to delete product from cart:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to delete product from cart",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to delete product from cart",
+      error: error.message,
+    });
   }
 };

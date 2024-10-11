@@ -198,6 +198,7 @@ export const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+    console.log(req.session.userId);
 
     req.session.userId = user._id; // Create session
 
@@ -366,5 +367,29 @@ export const deleteCard = async (req, res) => {
     res.status(200).json({ message: "Card removed successfully" });
   } catch (error) {
     handleError(res, "Failed to delete card", error);
+  }
+};
+// Validate User Token
+export const validateUser = async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ message: "No token provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ user });
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token has expired" });
+    }
+    return res.status(403).json({ message: "Invalid token" });
   }
 };

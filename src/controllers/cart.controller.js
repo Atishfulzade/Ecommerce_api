@@ -7,16 +7,16 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 // Get cart for a user
 export const getCart = async (req, res) => {
   try {
-    const { id } = req.user; // Use query params for userId
+    const userId = req.user.id; // Use the authenticated user ID
 
-    if (!id || !isValidObjectId(id)) {
-      return res.status(400).json({ message: "Invalid or missing User ID" });
+    if (!isValidObjectId(userId)) {
+      return res.status(400).json({ message: "Invalid User ID" });
     }
 
-    const cart = await Cart.findOne({ id });
+    const cart = await Cart.findOne({ userId });
 
     if (!cart || cart.products.length === 0) {
-      return res.status(404).json({ message: "Cart is empty" });
+      return res.status(200).json({ message: "Cart is empty", products: [] });
     }
 
     res.status(200).json(cart);
@@ -31,41 +31,47 @@ export const getCart = async (req, res) => {
 // Add product to cart
 export const addToCart = async (req, res) => {
   try {
-    const { userId, productId, quantity } = req.body;
+    const { productId, quantity } = req.body;
+    const userId = req.user.id; // Use authenticated user ID
 
-    if (
-      !userId ||
-      !productId ||
-      quantity == null ||
-      !isValidObjectId(userId) ||
-      !isValidObjectId(productId)
-    ) {
+    if (!isValidObjectId(productId) || quantity == null || quantity <= 0) {
       return res.status(400).json({
-        message:
-          "User ID, product ID, and quantity are required and must be valid",
+        message: "Valid product ID and quantity are required",
       });
     }
 
-    let userCart = await Cart.findOne({ userId });
-
-    if (!userCart) {
-      userCart = new Cart({ userId, products: [{ productId, quantity }] });
-    } else {
-      const productIndex = userCart.products.findIndex(
-        (product) => product.productId.toString() === productId
-      );
-
-      if (productIndex > -1) {
-        userCart.products[productIndex].quantity += quantity;
-      } else {
-        userCart.products.push({ productId, quantity });
+    // Find the cart and update or create if it doesn't exist (upsert)
+    const updatedCart = await Cart.findOneAndUpdate(
+      { userId },
+      {
+        $setOnInsert: { userId }, // Create cart if not exists
+        $inc: { "products.$[elem].quantity": quantity }, // Update quantity
+      },
+      {
+        new: true, // Return the modified document
+        upsert: true, // Create if it doesn't exist
+        arrayFilters: [{ "elem.productId": productId }], // Only update specific product
       }
+    );
+
+    // If the cart is new (created by upsert) and no product found, add it manually
+    if (
+      !updatedCart ||
+      !updatedCart.products.find((p) => p.productId.toString() === productId)
+    ) {
+      const newCart = await Cart.findOneAndUpdate(
+        { userId },
+        { $push: { products: { productId, quantity } } }, // Add new product if not exists
+        { new: true }
+      );
+      return res
+        .status(201)
+        .json({ message: "Product added to cart", cart: newCart });
     }
 
-    await userCart.save();
     res
       .status(200)
-      .json({ message: "Product added to cart successfully", cart: userCart });
+      .json({ message: "Product quantity updated", cart: updatedCart });
   } catch (error) {
     console.error("Failed to add product to cart:", error);
     res
@@ -77,41 +83,34 @@ export const addToCart = async (req, res) => {
 // Update cart item quantity
 export const editCartItem = async (req, res) => {
   try {
-    const { userId, productId, quantity } = req.body;
+    const updatedCartProduct = req.body;
+    const [productId, quantity] = updatedCartProduct;
+    const userId = req.user.id; // Use authenticated user ID
+    console.log(productId, quantity);
 
-    if (
-      !userId ||
-      !productId ||
-      quantity == null ||
-      quantity <= 0 ||
-      !isValidObjectId(userId) ||
-      !isValidObjectId(productId)
-    ) {
+    if (!isValidObjectId(productId) || quantity == null || quantity <= 0) {
       return res.status(400).json({
-        message: "User ID, product ID, and valid quantity are required",
+        message: "Valid product ID and quantity are required",
       });
     }
 
-    let userCart = await Cart.findOne({ userId });
+    // Find the cart and update quantity for the specified product
+    const updatedCart = await Cart.findOneAndUpdate(
+      { userId },
+      { $set: { "products.$[elem].quantity": quantity } }, // Update quantity
+      {
+        new: true, // Return updated cart
+        arrayFilters: [{ "elem.productId": productId }], // Only update specific product
+      }
+    );
 
-    if (!userCart) {
+    if (!updatedCart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    const productIndex = userCart.products.findIndex(
-      (product) => product.productId.toString() === productId
-    );
-
-    if (productIndex > -1) {
-      userCart.products[productIndex].quantity = quantity;
-
-      await userCart.save();
-      res
-        .status(200)
-        .json({ message: "Cart item updated successfully", cart: userCart });
-    } else {
-      res.status(404).json({ message: "Product not found in the cart" });
-    }
+    res
+      .status(200)
+      .json({ message: "Cart item updated successfully", cart: updatedCart });
   } catch (error) {
     console.error("Failed to update cart item:", error);
     res
@@ -123,40 +122,28 @@ export const editCartItem = async (req, res) => {
 // Delete a product from the cart
 export const deleteCart = async (req, res) => {
   try {
-    const { userId, productId } = req.body;
+    const { productId } = req.body;
+    const userId = req.user.id; // Use authenticated user ID
 
-    if (
-      !userId ||
-      !productId ||
-      !isValidObjectId(userId) ||
-      !isValidObjectId(productId)
-    ) {
-      return res.status(400).json({
-        message: "User ID and product ID are required and must be valid",
-      });
+    if (!isValidObjectId(productId)) {
+      return res.status(400).json({ message: "Valid product ID is required" });
     }
 
-    let userCart = await Cart.findOne({ userId });
+    // Find the cart and remove the product using $pull
+    const updatedCart = await Cart.findOneAndUpdate(
+      { userId },
+      { $pull: { products: { productId } } }, // Remove product from cart
+      { new: true }
+    );
 
-    if (!userCart) {
+    if (!updatedCart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    const productIndex = userCart.products.findIndex(
-      (product) => product.productId.toString() === productId
-    );
-
-    if (productIndex > -1) {
-      userCart.products.splice(productIndex, 1);
-
-      await userCart.save();
-      res.status(200).json({
-        message: "Product removed from cart successfully",
-        cart: userCart,
-      });
-    } else {
-      res.status(404).json({ message: "Product not found in the cart" });
-    }
+    res.status(200).json({
+      message: "Product removed from cart successfully",
+      cart: updatedCart,
+    });
   } catch (error) {
     console.error("Failed to delete product from cart:", error);
     res.status(500).json({

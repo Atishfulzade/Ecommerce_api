@@ -5,6 +5,7 @@ const ProductSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     category_id: { type: mongoose.Schema.Types.ObjectId, ref: "Category" }, // Reference to Category model with ObjectId
+    category_name: { type: mongoose.Schema.Types.String, required: true },
     min_catalog_price: { type: Number },
     min_product_price: { type: Number },
     description: { type: String, required: true },

@@ -1,24 +1,24 @@
 import express from "express";
 import { verifyUser } from "../controllers/user.controller.js";
 import {
-  addToCart,
-  deleteCart,
-  editCartItem,
   getCart,
+  addToCart,
+  editCartItem,
+  deleteCartItem,
 } from "../controllers/cart.controller.js";
 
 const router = express.Router();
 
-// GET - Fetch all items in the cart
+// Get cart for the authenticated user
 router.get("/", verifyUser, getCart);
 
-// POST - Add a new item to the cart
+// Add or update items in the cart
 router.post("/", verifyUser, addToCart);
 
-// PUT - Update a specific item in the cart
+// Update the quantity of a cart item
 router.put("/", verifyUser, editCartItem);
 
-// DELETE - Remove a specific item from the cart
-router.delete("/", verifyUser, deleteCart);
+// Remove an item from the cart
+router.delete("/", verifyUser, deleteCartItem);
 
 export default router;

@@ -42,7 +42,6 @@ export const getProductsBySupplierId = async (req, res) => {
 
 export const searchProduct = async (req, res) => {
   const { search } = req.body;
-  console.log(req);
 
   try {
     // Validate the search input
@@ -50,12 +49,29 @@ export const searchProduct = async (req, res) => {
       return res.status(400).json({ message: "Search query is required" });
     }
 
-    // Search for products with a case-insensitive regex
-    const products = await Product.find({
-      name: { $regex: search, $options: "i" }, // Case-insensitive search
-    });
+    // Search for products where either the name or the category matches the search input
+    const products = await Product.aggregate([
+      {
+        $match: {
+          $or: [
+            { name: { $regex: search, $options: "i" } }, // Match product name
+            { category: { $regex: search, $options: "i" } }, // Match category name
+          ],
+        },
+      },
+      {
+        $sample: { size: 10 }, // Get 10 random results
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field
+          name: 1, // Include product name
+          category: 1, // Include category name
+        },
+      },
+    ]);
 
-    // Send the list of products as a JSON response
+    // Send the results as a JSON response
     res.json(products);
   } catch (error) {
     console.error("Error fetching products:", error); // Log the error for debugging

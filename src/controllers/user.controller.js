@@ -1,4 +1,5 @@
 import { User } from "../models/userSchema.models.js";
+import { Supplier } from "../models/supplierSchema.models.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
@@ -370,6 +371,7 @@ export const deleteCard = async (req, res) => {
   }
 };
 // Validate User Token
+
 export const validateUser = async (req, res) => {
   const { token } = req.body;
 
@@ -379,17 +381,25 @@ export const validateUser = async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select("-password");
 
-    if (!user) {
+    // Check both User and Supplier collections for the decoded ID
+    const user = await User.findById(decoded.id).select("-password");
+    const supplier = await Supplier.findById(decoded.id).select("-password");
+
+    if (!user && !supplier) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ user });
+    // Respond with the appropriate data
+    if (supplier) {
+      return res.status(200).json({ supplier });
+    }
+    return res.status(200).json({ user });
   } catch (error) {
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Token has expired" });
     }
+    console.error("Error validating token:", error); // Log unexpected errors
     return res.status(403).json({ message: "Invalid token" });
   }
 };

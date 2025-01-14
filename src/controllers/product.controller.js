@@ -23,10 +23,7 @@ export const getProductsBySupplierId = async (req, res) => {
   }
 
   try {
-    const products = await Product.find({ supplier: supplierId }).select(
-      "-description -full_details -supplier -trend -popular -has_mrp -is_added_to_wishlist -shipping -available_stock"
-    ); // Assuming 'supplier' is the field in Product model
-
+    const products = await Product.find({ supplier: supplierId });
     if (!products || products.length === 0) {
       return res
         .status(404)
@@ -84,14 +81,28 @@ export const createProduct = async (req, res) => {
   const product_images = req.uploadedFilesKeys;
 
   try {
-    const { name, description } = req.body;
+    const {
+      name,
+      category_id,
+      category_name,
+      min_catalog_price,
+      min_product_price,
+      full_details,
+      trend,
+      popular,
+      has_mrp,
+      is_added_to_wishlist,
+      assured_details,
+      mall_verified,
+      average_rating,
+      available_stock,
+    } = req.body;
     console.log(req.body);
 
     // Check for required fields
-    if (!name || !description || !product_images) {
+    if (!name || !available_stock || !category_id || !product_images) {
       return res.status(400).json({
-        message:
-          "Name, description, and at least one product image are required fields.",
+        message: "Fill in required fields",
       });
     }
 
@@ -100,7 +111,7 @@ export const createProduct = async (req, res) => {
     // Create a new product object
     const newProduct = new Product({
       name,
-      description,
+
       product_images: product_images, // Store the array of signed URLs of uploaded images
       ...req.body, // Include any additional fields
     });

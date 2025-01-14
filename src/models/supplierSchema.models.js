@@ -4,6 +4,7 @@ import { addressSchema } from "./addressSchema.models.js"; // Importing shared a
 const supplierSchema = new mongoose.Schema(
   {
     profileImage: {
+      required: true,
       type: String,
       default: "uploads/user.png",
     },

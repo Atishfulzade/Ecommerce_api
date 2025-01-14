@@ -146,7 +146,7 @@ export const registerUser = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+    const verificationLink = `${process.env.CLIENT_URL}/verify-email?token=${token}`;
     await sendOtpEmail(
       user.email,
       `Please verify your email by clicking on this link: ${verificationLink}`

@@ -13,7 +13,8 @@ import {
   verifyUser,
   allUsers,
   deleteCard,
-  validateUser, // Ensure this controller is properly defined in the controller file
+  validateUser,
+  verificationLink, // Ensure this controller is properly defined in the controller file
 } from "../controllers/user.controller.js";
 import { uploadImageToS3 } from "../utils/s3_configuration.js";
 import { authorizeRoles } from "../utils/AuthoriseRole.js";
@@ -23,10 +24,11 @@ const router = express.Router();
 // ========================== Auth Routes ==========================
 router.post("/auth/login", loginUser);
 router.post("/auth/register", registerUser);
+router.post("/auth/verifymail", verificationLink);
 router.post("/auth/logout", logOutUser);
 router.post("/auth/reset-password", resetPassword);
 router.post("/auth/otp", verifyOtp);
-router.get("/auth/send-otp", verifyUser, sendOtp);
+router.post("/auth/send-otp", sendOtp);
 router.post("/auth/validateuser", validateUser);
 // ======================== Profile Routes =========================
 router.get("/profile", verifyUser, showProfile);

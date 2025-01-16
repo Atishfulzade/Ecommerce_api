@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { generateOTP } from "../utils/generateOTP.js";
 import { sendOtpEmail } from "../utils/sendMail.js";
 import mongoose from "mongoose";
+import { log } from "console";
 
 dotenv.config();
 
@@ -20,21 +21,15 @@ const handleError = (res, message, error = null, status = 500) => {
 // ========================== Reset Password ==========================
 export const resetPassword = async (req, res) => {
   try {
-    const { email, newPassword, otp } = req.body;
+    const { email, newPassword } = req.body;
 
-    if (!email || !newPassword || !otp) {
+    if (!email || !newPassword) {
       return res.status(400).json({ message: "All fields are required" });
     }
-
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    if (user.otp !== otp || user.otpExpiry < Date.now()) {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
-    }
-
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     user.otp = null;
@@ -63,6 +58,7 @@ export const sendOtp = async (req, res) => {
 
     const otp = generateOTP();
     const otpExpiry = Date.now() + 10 * 60 * 1000;
+    console.log(otpExpiry);
 
     user.otp = otp;
     user.otpExpiry = otpExpiry;
@@ -70,7 +66,7 @@ export const sendOtp = async (req, res) => {
 
     await sendOtpEmail(user.email, `Your OTP for password reset is: ${otp}`);
 
-    res.status(200).json({ message: "OTP sent to email successfully" });
+    return res.status(200).json({ message: "OTP sent to email successfully" });
   } catch (error) {
     handleError(res, "Failed to send OTP", error);
   }
@@ -401,5 +397,36 @@ export const validateUser = async (req, res) => {
     }
     console.error("Error validating token:", error); // Log unexpected errors
     return res.status(403).json({ message: "Invalid token" });
+  }
+};
+
+// ========================== Verify link ==========================
+export const verificationLink = async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ message: "No token provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Check if the user exists
+    const user = await User.findById(decoded.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the user's verification status
+    user.isVerified = true;
+    await user.save(); // Save the changes in the database
+
+    return res.status(200).json({ message: "Verification successful" });
+  } catch (error) {
+    console.error("Verification error:", error);
+    return res
+      .status(500)
+      .json({ message: "Verification failed!", error: error.message });
   }
 };

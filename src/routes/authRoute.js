@@ -14,7 +14,8 @@ import {
   allUsers,
   deleteCard,
   validateUser,
-  verificationLink, // Ensure this controller is properly defined in the controller file
+  verificationLink,
+  deleteUserAccount, // Ensure this controller is properly defined in the controller file
 } from "../controllers/user.controller.js";
 import { uploadImageToS3 } from "../utils/s3_configuration.js";
 import { authorizeRoles } from "../utils/AuthoriseRole.js";
@@ -30,6 +31,7 @@ router.post("/auth/reset-password", resetPassword);
 router.post("/auth/otp", verifyOtp);
 router.post("/auth/send-otp", sendOtp);
 router.post("/auth/validateuser", validateUser);
+router.delete("/delete", verifyUser, deleteUserAccount);
 // ======================== Profile Routes =========================
 router.get("/profile", verifyUser, showProfile);
 router.put(

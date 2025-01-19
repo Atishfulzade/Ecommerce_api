@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema(
       minlength: 2,
       maxlength: 50,
     },
+
     email: {
       type: String,
       required: true,
@@ -31,6 +32,13 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+    },
+    dateOfBirth: {
+      type: Date,
     },
     address: addressSchema,
     role: {
@@ -56,8 +64,16 @@ const userSchema = new mongoose.Schema(
     },
     cards: [
       {
-        cardNumber: String,
-        cardholderName: String,
+        cardNumber: {
+          type: String,
+          minlength: 16,
+          maxlength: 19, // Visa, MasterCard, American Express, Discover
+        },
+        cardholderName: {
+          type: String,
+          minlength: 2,
+          maxlength: 50,
+        },
         expiryDate: String,
         cvv: String,
         userId: {

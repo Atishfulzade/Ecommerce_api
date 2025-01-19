@@ -5,8 +5,6 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { generateOTP } from "../utils/generateOTP.js";
 import { sendOtpEmail } from "../utils/sendMail.js";
-import mongoose from "mongoose";
-import { log } from "console";
 
 dotenv.config();
 
@@ -116,9 +114,17 @@ export const verifyOtp = async (req, res) => {
 // ========================== Register New User ==========================
 export const registerUser = async (req, res) => {
   try {
-    const { firstname, lastname, email, password } = req.body;
+    const { firstname, lastname, email, password, gender, dateOfBirth } =
+      req.body;
 
-    if (!firstname || !lastname || !email || !password) {
+    if (
+      !firstname ||
+      !lastname ||
+      !email ||
+      !password ||
+      !gender ||
+      !dateOfBirth
+    ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -195,7 +201,6 @@ export const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-    console.log(req.session.userId);
 
     req.session.userId = user._id; // Create session
 
@@ -291,19 +296,30 @@ export const addOrUpdateAddress = async (req, res) => {
     handleError(res, "Failed to update address", error);
   }
 };
-
-export const fetchAddress = async (req, res) => {
+//========================== delete user account ====================================
+export const deleteUserAccount = async (req, res) => {
   try {
     const { id: userId } = req.user;
 
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
 
-    res.status(200).json({ address: user.address });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await User.findByIdAndDelete(userId);
+    return res
+      .status(200)
+      .json({ message: "User account deleted successfully" });
   } catch (error) {
-    handleError(res, "Failed to fetch address", error);
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Unable to delete user account" });
   }
 };
+
 // ============================ Retrieve All Users (Admin Only) ============================
 export const allUsers = async (req, res) => {
   try {
@@ -316,33 +332,24 @@ export const allUsers = async (req, res) => {
 // ============================ Card Controllers ============================
 export const addCard = async (req, res) => {
   try {
-    const { cardNumber, cardholderName, expiryDate, cvv, userId } = req.body;
-    console.log("adding", req.body);
+    const { cardNumber, expiryDate, cvv, cardholderName, userId } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: "Invalid user ID" });
+    if (!cardNumber || !expiryDate || !cvv || !cardholderName) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    const newCard = {
-      cardNumber,
-      cardholderName,
-      expiryDate,
-      cvv,
-      userId, // Attach the userId to the card
-    };
-
-    // Push the card into the user's card array
-    user.cards.push(newCard);
-    await user.save(); // Save the user with the updated card list
-
-    res.status(201).json({ message: "Card added successfully", card: newCard });
+    user.cards.push({ cardNumber, cardholderName, expiryDate, cvv, userId });
+    await user.save();
+    res
+      .status(201)
+      .json({ message: "Card added successfully", cards: user.cards });
   } catch (error) {
-    handleError(res, "Failed to add card", error);
+    console.error("Failed to add card:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -361,7 +368,7 @@ export const deleteCard = async (req, res) => {
     user.cards = user.cards.filter((card) => card._id.toString() !== cardId);
     await user.save();
 
-    res.status(200).json({ message: "Card removed successfully" });
+    res.status(200).json({ message: "Card removed successfully", user });
   } catch (error) {
     handleError(res, "Failed to delete card", error);
   }

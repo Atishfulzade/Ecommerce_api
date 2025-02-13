@@ -131,6 +131,31 @@ export const createProduct = async (req, res) => {
   }
 };
 
+export const productByCategory = async (req, res) => {
+  try {
+    const { categoryName } = req.params;
+
+    // Using regex to perform a case-insensitive partial match
+    const products = await Product.find({
+      category_name: { $regex: categoryName, $options: "i" },
+    });
+
+    if (!products.length) {
+      return res
+        .status(404)
+        .json({ message: "No products found for this category" });
+    }
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("Failed to fetch products by category:", error);
+    res.status(500).json({
+      message: "Failed to fetch products by category",
+      error: error.message,
+    });
+  }
+};
+
 // Filter products by price and category
 export const filterProduct = async (req, res) => {
   try {

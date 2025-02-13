@@ -6,6 +6,7 @@ import {
   findById,
   getAllProducts,
   getProductsBySupplierId,
+  productByCategory,
   searchProduct,
   updateProduct,
 } from "../controllers/product.controller.js";
@@ -29,12 +30,11 @@ router.post(
 // router.get("/product/:supplierId", verifySupplier, getProductsBySupplierId);
 router.get("/product", verifySupplier, getProductsBySupplierId);
 
-// Filter products by category
 router.put("/:id", verifySupplier, updateProduct);
 router.delete("/:id", verifySupplier, deleteProduct);
 
 router.get("/filter", filterProduct);
-
+router.get("/category/:categoryName", productByCategory);
 // Get a product by ID
 router.get("/:id", findById);
 

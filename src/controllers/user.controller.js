@@ -114,17 +114,11 @@ export const verifyOtp = async (req, res) => {
 // ========================== Register New User ==========================
 export const registerUser = async (req, res) => {
   try {
-    const { firstname, lastname, email, password, gender, dateOfBirth } =
-      req.body;
+    const { firstname, lastname, email, password, gender } = req.body;
 
-    if (
-      !firstname ||
-      !lastname ||
-      !email ||
-      !password ||
-      !gender ||
-      !dateOfBirth
-    ) {
+    console.log(req.body);
+
+    if (!firstname || !lastname || !email || !password || !gender) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -139,6 +133,7 @@ export const registerUser = async (req, res) => {
       lastname,
       email,
       password: hashedPassword,
+      gender,
     });
     await user.save();
 
@@ -323,7 +318,7 @@ export const deleteUserAccount = async (req, res) => {
 // ============================ Retrieve All Users (Admin Only) ============================
 export const allUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find(); // Fetch all users
     res.status(200).json(users);
   } catch (error) {
     handleError(res, "Failed to fetch users", error);
@@ -338,12 +333,12 @@ export const addCard = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId); // Find the user by their ID
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
     user.cards.push({ cardNumber, cardholderName, expiryDate, cvv, userId });
-    await user.save();
+    await user.save(); // Save the card to the user's document
     res
       .status(201)
       .json({ message: "Card added successfully", cards: user.cards });
